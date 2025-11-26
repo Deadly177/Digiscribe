@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.14, pytest-9.0.1, pluggy-1.6.0 -- /Users/deadlyrider/Desktop/DigitScribe-main 2/pc/ml/.venv/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /Users/deadlyrider/Desktop/DigitScribe-main 2/pc/ml
+plugins: anyio-4.11.0, cov-7.0.0
+collecting ... collected 7 items
+
+tests/test_model.py::test_decode_image_accepts_flat_array PASSED         [ 14%]
+tests/test_model.py::test_decode_image_rejects_wrong_size PASSED         [ 28%]
+tests/test_model.py::test_decode_image_accepts_base64_png PASSED         [ 42%]
+tests/test_model.py::test_ensure_active_model_raises_when_missing PASSED [ 57%]
+tests/test_model.py::test_load_tf_model_success PASSED                   [ 71%]
+tests/test_model.py::test_predict_digit_returns_result PASSED            [ 85%]
+tests/test_model.py::test_train_model_worker_updates_registry PASSED     [100%]
+
+======================== 7 passed, 3 warnings in 11.76s ========================

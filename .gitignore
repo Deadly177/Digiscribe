@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Python virtual environments
+.venv/
+**/.venv/
+__pycache__/
+*.pyc
+
+# Node/NPM artifacts
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+
+# Java/Maven build output
+pc/backend/target/
+
+# Other generated paths
+.idea/
+*.iml
+7/

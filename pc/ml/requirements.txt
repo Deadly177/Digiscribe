@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+numpy
+pillow
+
+# TensorFlow distribution varies by platform.
+tensorflow==2.16.1 ; (sys_platform != "darwin") or (platform_machine != "arm64")
+tensorflow-macos==2.16.1 ; (sys_platform == "darwin") and (platform_machine == "arm64")
+tensorflow-metal==1.2.0 ; (sys_platform == "darwin") and (platform_machine == "arm64")

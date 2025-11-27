@@ -1,7 +1,17 @@
 import axios from 'axios'
 
+// Build base URL from env (falls back to local). Trim spaces and trailing slash.
+const rawBase = (import.meta.env.VITE_API_BASE || 'http://localhost:8081/api').trim()
+const normalizedBase = rawBase.endsWith('/')
+  ? rawBase.slice(0, -1)
+  : rawBase
+// Ensure we end with /api
+const baseURL = normalizedBase.endsWith('/api')
+  ? normalizedBase
+  : `${normalizedBase}/api`
+
 const api = axios.create({
-  baseURL: 'http://localhost:8081/api', // Spring Boot backend
+  baseURL,
   timeout: 10000,
 })
 

@@ -20,3 +20,8 @@ pc/backend/target/
 .idea/
 *.iml
 7/
+
+# Local DB and ML models
+pc/backend/data/
+pc/ml/models/*.h5
+pc/ml/models/registry.json

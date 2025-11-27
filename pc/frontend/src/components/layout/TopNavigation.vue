@@ -69,14 +69,14 @@
             </div>
           </div>
           <div class="dropdown-divider"></div>
-          <button class="dropdown-item">
+          <button class="dropdown-item" @click="goProfile">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
             {{ t('nav.profile') }}
           </button>
-          <button class="dropdown-item">
+          <button class="dropdown-item" @click="goSettings">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -142,9 +142,9 @@ export default {
 
     const currentPageTitle = computed(() => {
       const map = {
-        DashboardHome: t('sidebar.dashboard'),
+        Home: t('sidebar.dashboard'),
         DigitRecognition: t('sidebar.recognition'),
-        ModelManagement: t('sidebar.models'),
+        TrainModel: t('sidebar.models'),
         Analytics: t('sidebar.analytics'),
         FeedbackSystem: t('sidebar.feedback'),
         AdminPanel: t('sidebar.admin')
@@ -187,6 +187,16 @@ export default {
 
     const markNotificationsRead = () => {
       notifications.value = notifications.value.map(n => ({ ...n, read: true }))
+    }
+
+    const goProfile = () => {
+      showUserMenu.value = false
+      router.push({ name: 'Profile' })
+    }
+
+    const goSettings = () => {
+      showUserMenu.value = false
+      router.push({ name: 'Settings' })
     }
 
     const toggleUserMenu = () => {
@@ -232,6 +242,8 @@ export default {
       userName,
       userEmail,
       currentPageTitle,
+      goProfile,
+      goSettings,
       toggleNotifications,
       markNotificationsRead,
       toggleUserMenu,

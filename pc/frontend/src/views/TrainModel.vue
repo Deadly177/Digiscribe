@@ -474,7 +474,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import api from '@/services/api'
 
 export default {
-  name: 'ModelManagement',
+  name: 'TrainModel',
   setup() {
     const showCreateModal = ref(false)
     const currentStep = ref(1)

@@ -207,7 +207,7 @@ export default {
             role: response.role
           }))
         }
-        router.push({ name: 'DashboardHome' })
+        router.push({ name: 'Home' })
       } catch (error) {
         errorMessage.value = error.message || 'Registration failed'
       } finally {

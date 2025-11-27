@@ -2,12 +2,12 @@
   <div class="dashboard-layout">
     <!-- Sidebar -->
     <Sidebar :is-collapsed="sidebarCollapsed" @toggle="sidebarCollapsed = !sidebarCollapsed" />
-    
+
     <!-- Main Content -->
     <div class="main-content" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
       <!-- Top Navigation with User Menu -->
       <TopNavigation @toggle-sidebar="sidebarCollapsed = !sidebarCollapsed" />
-      
+
       <!-- Dashboard Content with Router View -->
       <div class="dashboard-content">
         <router-view></router-view>
@@ -22,7 +22,7 @@ import Sidebar from '../components/layout/Sidebar.vue'
 import TopNavigation from '../components/layout/TopNavigation.vue'
 
 export default {
-  name: 'Dashboard',
+  name: 'Dashboard1',
   components: {
     Sidebar,
     TopNavigation
@@ -69,7 +69,7 @@ export default {
     margin-left: 0;
     width: 100%;
   }
-  
+
   .main-content.sidebar-collapsed {
     margin-left: 0;
     width: 100%;

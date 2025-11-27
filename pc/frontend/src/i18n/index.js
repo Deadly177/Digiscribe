@@ -24,23 +24,20 @@ const messages = {
       remember: 'Remember me',
       submit: 'Sign In',
       submitting: 'Signing In...',
-      guestCta: 'Preview Dashboard (Guest Mode)',
-      divider: 'or continue with',
-      wechat: 'WeChat Login (In Development)',
       noAccount: "Don't have an account?",
       signUp: 'Sign up'
     },
     sidebar: {
       dashboard: 'Dashboard',
       recognition: 'Digit Recognition',
-      models: 'AI Models',
+      models: 'Train Models ',
       analytics: 'Analytics',
       feedback: 'Feedback',
       admin: 'Admin Panel',
       main: 'Main',
       analyticsSection: 'Analytics',
       adminSection: 'Administration',
-      returnDashboard: 'Back to Console'
+      returnDashboard: 'Home '
     },
     nav: {
       dashboard: 'Dashboard',
@@ -76,9 +73,6 @@ const messages = {
       remember: '记住我',
       submit: '登录',
       submitting: '登录中...',
-      guestCta: '以访客模式预览控制台',
-      divider: '或使用以下方式继续',
-      wechat: '微信登录（建设中）',
       noAccount: '还没有账号？',
       signUp: '立即注册'
     },

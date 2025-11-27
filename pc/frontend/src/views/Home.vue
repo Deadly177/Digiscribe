@@ -22,9 +22,6 @@
         <div class="stat-content">
           <div class="stat-value">{{ dashboardStats.totalPredictions.toLocaleString() }}</div>
           <div class="stat-label">{{ strings.stats.predictions }}</div>
-          <div class="stat-change" :class="getChangeClass(dashboardStats.predictionChange)">
-            {{ formatChange(dashboardStats.predictionChange) }}
-          </div>
         </div>
       </div>
 
@@ -38,9 +35,6 @@
         <div class="stat-content">
           <div class="stat-value">{{ dashboardStats.accuracy.toFixed(1) }}%</div>
           <div class="stat-label">{{ strings.stats.accuracy }}</div>
-          <div class="stat-change" :class="getChangeClass(dashboardStats.accuracyChange)">
-            {{ formatChange(dashboardStats.accuracyChange, true) }}
-          </div>
         </div>
       </div>
 
@@ -55,7 +49,6 @@
         <div class="stat-content">
           <div class="stat-value">{{ dashboardStats.activeModels }}</div>
           <div class="stat-label">{{ strings.stats.models }}</div>
-          <div class="stat-change neutral">{{ strings.noChange }}</div>
         </div>
       </div>
 
@@ -68,9 +61,6 @@
         <div class="stat-content">
           <div class="stat-value">{{ dashboardStats.feedbackCount }}</div>
           <div class="stat-label">{{ strings.stats.feedback }}</div>
-          <div class="stat-change" :class="getChangeClass(dashboardStats.feedbackChange)">
-            {{ formatChange(dashboardStats.feedbackChange) }}
-          </div>
         </div>
       </div>
     </div>
@@ -155,8 +145,8 @@
       </div>
       <div class="activity-list">
         <p v-if="!recentActivities.length" class="empty-activity">{{ strings.emptyActivity }}</p>
-        <div 
-          v-for="activity in recentActivities" 
+        <div
+          v-for="activity in recentActivities"
           :key="activity.id"
           class="activity-item"
         >
@@ -187,7 +177,7 @@ import api from '@/services/api'
 import authService from '@/services/authService'
 
 export default {
-  name: 'DashboardHome',
+  name: 'Home',
   setup() {
     const loading = ref(true)
     const dashboardStats = ref({
@@ -199,12 +189,12 @@ export default {
       accuracyChange: 0,
       feedbackChange: 0
     })
-    
+
     const recentActivities = ref([])
     const { locale } = useI18n()
 
     const enCopy = {
-      title: 'Dashboard',
+      title: 'Dashboard ',
       subtitle: "Welcome back! Here's your digit recognition overview",
       loading: 'Loading data...',
       stats: {
@@ -321,38 +311,64 @@ export default {
     const fetchDashboardData = async () => {
       try {
         loading.value = true
-        
-        const [statsResponse, activitiesResponse] = await Promise.all([
+
+        const [statsResponse, activitiesResponse, modelsResponse, accuracyResponse] = await Promise.all([
           api.get('/admin/dashboard'),
-          api.get('/admin/logs')
+          api.get('/admin/logs'),
+          api.get('/models'),
+          api.get('/models/accuracy-by-digit')
         ])
-        
+
         const stats = statsResponse.data || {}
+        const models = Array.isArray(modelsResponse.data) ? modelsResponse.data : []
+        const modelTotalPredictions = models.reduce((sum, m) => sum + (m.prediction_count || 0), 0)
+        const accuracyData = Array.isArray(accuracyResponse.data) ? accuracyResponse.data : []
+        const accuracyFromDigits = accuracyData.length
+          ? (accuracyData.reduce((sum, d) => sum + (d.accuracy || 0), 0) / accuracyData.length)
+          : 0
+
         dashboardStats.value = {
-          totalPredictions: stats.totalPredictions || 0,
-          accuracy: stats.accuracy || 0,
+          totalPredictions: modelTotalPredictions || stats.totalPredictions || 0,
+          accuracy: accuracyFromDigits || stats.accuracy || 0,
           activeModels: stats.activeModels || 0,
           feedbackCount: stats.feedbackCount || 0,
           predictionChange: stats.predictionChange || 0,
           accuracyChange: stats.accuracyChange || 0,
           feedbackChange: stats.feedbackChange || 0
         }
-        recentActivities.value = formatActivities(activitiesResponse.data || [])
+
+        const localPredictions = getLocalRecentPredictions()
+        recentActivities.value = localPredictions.length
+          ? localPredictions
+          : formatActivities(activitiesResponse.data || [])
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)
         // Fallback to mock data if API fails
-        dashboardStats.value = {
-          totalPredictions: 15420,
-          accuracy: 98.3,
-          activeModels: 3,
-          feedbackCount: 1323,
-          predictionChange: 12.5,
-          accuracyChange: 2.3,
-          feedbackChange: 8.2
-        }
-        recentActivities.value = getMockActivities()
+        dashboardStats.value.totalPredictions = dashboardStats.value.totalPredictions || 15420
+        dashboardStats.value.accuracy = dashboardStats.value.accuracy || 98.3
+        dashboardStats.value.activeModels = dashboardStats.value.activeModels || 3
+        dashboardStats.value.feedbackCount = dashboardStats.value.feedbackCount || 1323
+        dashboardStats.value.predictionChange = dashboardStats.value.predictionChange || 12.5
+        dashboardStats.value.accuracyChange = dashboardStats.value.accuracyChange || 2.3
+        dashboardStats.value.feedbackChange = dashboardStats.value.feedbackChange || 8.2
+        const localPredictions = getLocalRecentPredictions()
+        recentActivities.value = localPredictions.length ? localPredictions : getMockActivities()
       } finally {
         loading.value = false
+      }
+    }
+
+    const getLocalRecentPredictions = () => {
+      try {
+        const raw = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
+        return raw.slice(0, 10).map((item, idx) => ({
+          id: item.id || idx,
+          message: `Digit ${item.predicted_digit} predicted (${((item.confidence || 0) * 100).toFixed(1)}%)`,
+          type: 'success',
+          timestamp: item.timestamp || new Date().toISOString()
+        }))
+      } catch (e) {
+        return []
       }
     }
 
@@ -376,7 +392,7 @@ export default {
       const days = Math.floor(diff / 86400000)
       const hours = Math.floor(diff / 3600000)
       const minutes = Math.floor(diff / 60000)
-      
+
       if (days > 0) return strings.value.timeAgo.days(days)
       if (hours > 0) return strings.value.timeAgo.hours(hours)
       if (minutes > 0) return strings.value.timeAgo.minutes(minutes)
@@ -791,17 +807,17 @@ export default {
   .stats-overview {
     grid-template-columns: 1fr;
   }
-  
+
   .actions-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .activity-header {
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
-  
+
   .view-all-link {
     align-self: flex-end;
   }

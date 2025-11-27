@@ -3,9 +3,9 @@
     "id": "dummy",
     "name": "Dummy",
     "version": "0.1",
-    "status": "active",
+    "status": "idle",
     "accuracy": 98.92,
-    "prediction_count": 406,
+    "prediction_count": 437,
     "training_samples": 60000,
     "last_trained": "2025-11-27T02:29:48.914586",
     "architecture": "cnn_simple",
@@ -14,6 +14,23 @@
     "total_epochs": 5,
     "model_path": "/Users/deadlyrider/Desktop/DigitScribe-main 2/pc/ml/models/Dummy_20251127_022948.h5",
     "created_at": "now",
+    "model_size_mb": 1.11
+  },
+  "1aaef5fe-e3bb-4ebc-b1f3-11c7794a9621": {
+    "id": "1aaef5fe-e3bb-4ebc-b1f3-11c7794a9621",
+    "name": "TESTING 1 ",
+    "version": "1.0",
+    "status": "active",
+    "accuracy": 99.32,
+    "prediction_count": 63,
+    "training_samples": 60000,
+    "last_trained": "2025-11-27T17:18:29.762479",
+    "architecture": "cnn_simple",
+    "training_progress": 100,
+    "current_epoch": 10,
+    "total_epochs": 10,
+    "model_path": "/Users/deadlyrider/Desktop/DigitScribe-main 2/pc/ml/models/TESTING 1 _20251127_171829.h5",
+    "created_at": "2025-11-27T17:14:51.467713",
     "model_size_mb": 1.11
   }
 }

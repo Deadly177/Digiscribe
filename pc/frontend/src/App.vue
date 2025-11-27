@@ -36,6 +36,23 @@ export default {
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
 
+:root[data-theme='dark'] {
+  --primary: #22c55e;
+  --primary-dark: #22c55e;
+  --primary-light: #0f172a;
+  --secondary: #0ea5e9;
+  --success: #22c55e;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --background: #0b1120;
+  --surface: #0f172a;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --border: #1f2937;
+  --shadow: 0 6px 16px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 24px rgb(0 0 0 / 0.4);
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--background);

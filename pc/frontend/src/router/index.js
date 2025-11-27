@@ -3,11 +3,13 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Dashboard from '../views/Dashboard.vue'
 import DigitRecognition from '../views/DigitRecognition.vue'
-import ModelManagement from '../views/ModelManagement.vue'
+import TrainModel from '../views/TrainModel.vue'
 import Analytics from '../views/Analytics.vue'
 import FeedbackSystem from '../views/FeedbackSystem.vue'
 import AdminPanel from '../views/AdminPanel.vue'
-import DashboardHome from '../views/DashboardHome.vue'
+import Home from '../views/Home.vue'
+import Profile from '../views/Profile.vue'
+import Settings from '../views/Settings.vue'
 
 const routes = [
   {
@@ -24,12 +26,12 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
-    redirect: { name: 'DashboardHome' },
+    redirect: { name: 'Home' },
     children: [
     {
       path: '',
-      name: 'DashboardHome',
-      component: DashboardHome  // Use the new component here
+      name: 'Home',
+      component: Home  // Use the new component here
     },
       {
         path: 'recognition',
@@ -38,8 +40,8 @@ const routes = [
       },
       {
         path: 'models',
-        name: 'ModelManagement',
-        component: ModelManagement
+        name: 'TrainModel',
+        component: TrainModel
       },
       {
         path: 'analytics',
@@ -55,6 +57,16 @@ const routes = [
         path: 'admin',
         name: 'AdminPanel',
         component: AdminPanel
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: Profile
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: Settings
       }
     ]
   },

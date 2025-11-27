@@ -18,8 +18,8 @@
         <strong>{{ systemStats.totalPredictions.toLocaleString() }}</strong>
       </div>
       <div class="insight-card">
-        <span>Accuracy</span>
-        <strong>{{ systemStats.accuracy.toFixed(1) }}%</strong>
+        <span>Activated Model</span>
+        <strong>{{ activeModelName || 'Not set' }}</strong>
       </div>
       <div class="insight-card">
         <span>Active Models</span>
@@ -43,10 +43,10 @@
           <span>Optimized for stylus or mouse input</span>
         </div>
         <div class="canvas-container">
-          <canvas 
+          <canvas
             ref="canvas"
-            width="320" 
-            height="320"
+            width="280"
+            height="280"
             class="drawing-canvas"
             @mousedown="startDrawing"
             @mousemove="draw"
@@ -72,8 +72,8 @@
         <div class="quick-actions">
           <h3>Quick Test</h3>
           <div class="quick-digits">
-            <button 
-              v-for="digit in [0,1,2,3,4,5,6,7,8,9]" 
+            <button
+              v-for="digit in [0,1,2,3,4,5,6,7,8,9]"
               :key="digit"
               class="digit-btn"
               @click="loadTestDigit(digit)"
@@ -96,49 +96,17 @@
               <div class="prediction-meta">
                 <div>
                   <span>Confidence</span>
-                  <strong>{{ (currentPrediction.confidence * 100).toFixed(1) }}%</strong>
+                  <strong>&nbsp;{{ (currentPrediction.confidence * 100).toFixed(1) }}%</strong>
                 </div>
                 <div>
                   <span>Processing Time</span>
-                  <strong>{{ currentPrediction.processing_time }} ms</strong>
+                  <strong>&nbsp;{{ currentPrediction.processing_time }} ms</strong>
                 </div>
               </div>
             </div>
             <div v-else class="empty-state">
               <div class="placeholder-icon">?</div>
               <p>Draw a digit to see prediction.</p>
-            </div>
-          </div>
-
-          <div class="card feedback-card">
-            <div class="panel-header">
-              <h2>Feedback</h2>
-              <span v-if="!currentPrediction">Predict first to share feedback</span>
-            </div>
-            <div v-if="currentPrediction" class="feedback-buttons">
-              <button 
-                class="feedback-btn correct" 
-                @click="submitFeedback(true)"
-                :disabled="feedbackSubmitted || !currentPrediction.history_id"
-              >
-                ✓ Correct
-              </button>
-              <button 
-                class="feedback-btn incorrect" 
-                @click="submitFeedback(false)"
-                :disabled="feedbackSubmitted || !currentPrediction.history_id"
-              >
-                ✗ Incorrect
-              </button>
-              <small v-if="!currentPrediction.history_id">
-                Login to enable feedback logging.
-              </small>
-            </div>
-            <div v-else class="empty-state small">
-              Provide feedback once a prediction is available.
-            </div>
-            <div v-if="feedbackSubmitted" class="feedback-thanks">
-              Thank you for your feedback!
             </div>
           </div>
         </div>
@@ -149,26 +117,26 @@
             <span v-if="currentPrediction">Highest bar marks predicted digit.</span>
           </div>
           <div class="confidence-bars">
-            <div 
-              v-for="i in 10" 
+            <div
+              v-for="i in 10"
               :key="i"
               class="confidence-bar-container"
             >
               <div class="digit-label">{{ i-1 }}</div>
               <div class="confidence-bar-background">
-                <div 
+                <div
                   class="confidence-bar-fill"
                   :class="{ 'highest': currentPrediction && (i-1) === currentPrediction.predicted_digit }"
-                  :style="{ 
-                    width: currentPrediction && currentPrediction.confidence_distribution 
-                      ? `${currentPrediction.confidence_distribution[i-1] * 100}%` 
-                      : '0%' 
+                  :style="{
+                    width: currentPrediction && currentPrediction.confidence_distribution
+                      ? `${currentPrediction.confidence_distribution[i-1] * 100}%`
+                      : '0%'
                   }"
                 ></div>
               </div>
               <div class="confidence-percent">
-                {{ currentPrediction && currentPrediction.confidence_distribution 
-                  ? `${(currentPrediction.confidence_distribution[i-1] * 100).toFixed(1)}%` 
+                {{ currentPrediction && currentPrediction.confidence_distribution
+                  ? `${(currentPrediction.confidence_distribution[i-1] * 100).toFixed(1)}%`
                   : '0.0%' }}
               </div>
             </div>
@@ -181,8 +149,8 @@
             <span>Most recent interactions in this session.</span>
           </div>
           <div class="predictions-list">
-            <div 
-              v-for="prediction in recentPredictions" 
+            <div
+              v-for="prediction in recentPredictions"
               :key="prediction.id"
               class="prediction-item"
             >
@@ -194,7 +162,7 @@
               </div>
               <div class="prediction-meta">
                 <span class="prediction-time">{{ formatTime(prediction.timestamp) }}</span>
-                <span 
+                <span
                   class="prediction-status"
                   :class="prediction.correct ? 'correct' : 'incorrect'"
                 >
@@ -219,6 +187,8 @@ import api from '@/services/api'
 export default {
   name: 'DigitRecognition',
   setup() {
+    const PREDICTION_CACHE_KEY = 'digit_recognition_model_counts'
+    const RECENT_PREDICTIONS_KEY = 'digit_recognition_recent_predictions'
     const canvas = ref(null)
     const ctx = ref(null)
     const isDrawing = ref(false)
@@ -226,6 +196,7 @@ export default {
     const currentPrediction = ref(null)
     const feedbackSubmitted = ref(false)
     const recentPredictions = ref([])
+    const activeModelName = ref('Not set')
     const systemStats = ref({
       totalPredictions: 0,
       accuracy: 0,
@@ -234,15 +205,50 @@ export default {
     })
     const insightsLoading = ref(false)
 
+    const loadCachedCounts = () => {
+      try {
+        return JSON.parse(localStorage.getItem(PREDICTION_CACHE_KEY)) || {}
+      } catch (e) {
+        return {}
+      }
+    }
+
+    const saveCachedCount = (modelName, count) => {
+      if (!modelName) return
+      const cache = loadCachedCounts()
+      cache[modelName] = count
+      localStorage.setItem(PREDICTION_CACHE_KEY, JSON.stringify(cache))
+    }
+
+    const loadRecentFromStorage = () => {
+      try {
+        return JSON.parse(localStorage.getItem(RECENT_PREDICTIONS_KEY)) || []
+      } catch (e) {
+        return []
+      }
+    }
+
+    const saveRecentToStorage = (list) => {
+      try {
+        localStorage.setItem(
+          RECENT_PREDICTIONS_KEY,
+          JSON.stringify(list.slice(0, 10))
+        )
+      } catch (e) {
+        // ignore storage errors
+      }
+    }
+
     onMounted(() => {
       initCanvas()
+      recentPredictions.value = loadRecentFromStorage()
       loadInsights()
     })
 
     const initCanvas = () => {
       const canvasEl = canvas.value
       ctx.value = canvasEl.getContext('2d')
-      
+
       // Set white background
       ctx.value.fillStyle = '#ffffff'
       ctx.value.fillRect(0, 0, canvasEl.width, canvasEl.height)
@@ -260,15 +266,15 @@ export default {
 
     const draw = (event) => {
       if (!isDrawing.value) return
-      
+
       const canvasEl = canvas.value
       const rect = canvasEl.getBoundingClientRect()
       const scaleX = canvasEl.width / rect.width
       const scaleY = canvasEl.height / rect.height
-      
+
       const x = (event.clientX - rect.left) * scaleX
       const y = (event.clientY - rect.top) * scaleY
-      
+
       ctx.value.lineTo(x, y)
       ctx.value.stroke()
     }
@@ -318,6 +324,14 @@ export default {
           activeModels: data.activeModels || 0,
           feedbackCount: data.feedbackCount || 0
         }
+        activeModelName.value = data.activeModelName || data.activeModel || data.activeModelId || activeModelName.value
+        // Pull cached count for this model and take the max so we don't regress
+        if (activeModelName.value) {
+          const cache = loadCachedCounts()
+          const cachedCount = cache[activeModelName.value] || 0
+          systemStats.value.totalPredictions = Math.max(systemStats.value.totalPredictions, cachedCount)
+          saveCachedCount(activeModelName.value, systemStats.value.totalPredictions)
+        }
       } catch (error) {
         console.warn('Failed to load insights', error)
       } finally {
@@ -328,7 +342,7 @@ export default {
     const predictDigit = async () => {
       loading.value = true
       feedbackSubmitted.value = false
-      
+
       try {
         // Get image data in the format expected by Flask backend
         const imageData = JSON.stringify(getImageDataArray())
@@ -347,7 +361,8 @@ export default {
           model_used: payload.modelUsed,
           history_id: payload.historyId || null
         }
-        
+        activeModelName.value = payload.modelUsed || activeModelName.value
+
         // Add to recent predictions
         recentPredictions.value.unshift({
           id: Date.now(),
@@ -357,12 +372,24 @@ export default {
           correct: null,
           backend: 'spring'
         })
-        
-        // Keep only last 10 predictions
+
+        // Increment total predictions per active model and persist locally
+        if (activeModelName.value) {
+          const cache = loadCachedCounts()
+          const currentCount = cache[activeModelName.value] || systemStats.value.totalPredictions || 0
+          const nextCount = currentCount + 1
+          systemStats.value.totalPredictions = nextCount
+          saveCachedCount(activeModelName.value, nextCount)
+        } else {
+          systemStats.value.totalPredictions += 1
+        }
+
+        // Keep only last 10 predictions and persist to localStorage
         if (recentPredictions.value.length > 10) {
           recentPredictions.value = recentPredictions.value.slice(0, 10)
         }
-        
+        saveRecentToStorage(recentPredictions.value)
+
       } catch (error) {
         console.error('Prediction failed:', error)
         alert(`Prediction failed: ${error.response?.data?.message || error.message}`)
@@ -377,14 +404,14 @@ export default {
       const tempCtx = tempCanvas.getContext('2d')
       tempCanvas.width = 28
       tempCanvas.height = 28
-      
+
       // Draw and resize with smoothing disabled for crisp scaling
       tempCtx.imageSmoothingEnabled = false
       tempCtx.drawImage(canvas.value, 0, 0, 28, 28)
-      
+
       // Get image data
       const imageData = tempCtx.getImageData(0, 0, 28, 28)
-      
+
       // Convert to grayscale array (MNIST format) and invert colors
       const grayscale = []
       for (let i = 0; i < imageData.data.length; i += 4) {
@@ -395,7 +422,7 @@ export default {
         const gray = 1 - ((r + g + b) / 3 / 255.0)
         grayscale.push(gray)
       }
-      
+
       console.log('Processed image data:', grayscale.length, 'pixels')
       return grayscale
     }
@@ -434,7 +461,7 @@ export default {
 
     const loadTestDigit = async (digit) => {
       clearCanvas()
-      
+
       // For demo purposes - you could implement actual test digit loading
       // This would require pre-drawn test images
       setTimeout(() => {
@@ -442,11 +469,11 @@ export default {
           predicted_digit: digit,
           confidence: 0.95,
           processing_time: 25,
-          confidence_distribution: Array.from({length: 10}, (_, i) => 
+          confidence_distribution: Array.from({length: 10}, (_, i) =>
             i === digit ? 0.95 : 0.05 / 9
           )
         }
-        
+
         recentPredictions.value.unshift({
           id: Date.now(),
           predicted_digit: digit,
@@ -476,6 +503,7 @@ export default {
       currentPrediction,
       feedbackSubmitted,
       recentPredictions,
+      activeModelName,
       systemStats,
       insightsLoading,
       loadInsights,
@@ -497,8 +525,8 @@ export default {
 .digit-recognition {
   padding: 24px;
   min-height: 100vh;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .page-header {
@@ -514,33 +542,33 @@ export default {
 }
 
 .page-header p {
-  color: #94a3b8;
+  color: var(--text-secondary);
   margin: 4px 0 0;
 }
 
 .header-actions .ghost-btn {
-  border: 1px solid #1f2937;
+  border: 1px solid var(--border);
   background: transparent;
-  color: #e2e8f0;
+  color: var(--text-primary);
   padding: 8px 14px;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s;
 }
 .header-actions .ghost-btn:hover {
-  background: #1f2937;
+  background: var(--border);
 }
 
 .insights {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .insight-card {
-  background: #111827;
-  border: 1px solid #1f2937;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -548,7 +576,7 @@ export default {
   gap: 4px;
 }
 .insight-card span {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 .insight-card strong {
@@ -561,17 +589,17 @@ export default {
 
 .recognition-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: 16px;
   align-items: flex-start;
 }
 
 .drawing-panel,
 .analysis-panel .card {
-  background: #111827;
-  border: 1px solid #1f2937;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 24px;
+  padding: 18px;
   box-shadow: 0 10px 30px rgb(15 23 42 / 0.35);
 }
 
@@ -579,7 +607,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .panel-header h2 {
   margin: 0;
@@ -587,16 +615,16 @@ export default {
 }
 .panel-header span {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .canvas-container {
   position: relative;
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px dashed #1f2937;
-  margin-bottom: 16px;
-  background: #0b1120;
+  border: 1px dashed var(--border);
+  margin-bottom: 12px;
+  background: var(--surface);
 }
 
 .drawing-canvas {
@@ -624,8 +652,8 @@ export default {
 
 .drawing-controls {
   display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .control-btn {
@@ -677,24 +705,24 @@ export default {
 }
 
 .digit-btn {
-  border: 1px solid #1f2937;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #0b1120;
-  color: #e2e8f0;
+  background: var(--surface);
+  color: var(--text-primary);
   font-size: 16px;
   padding: 10px;
   cursor: pointer;
   transition: background 0.2s;
 }
 .digit-btn:hover {
-  background: #1f2937;
+  background: var(--border);
 }
 
 .analysis-panel .flex-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .prediction-result {
@@ -704,15 +732,15 @@ export default {
 }
 
 .predicted-digit {
-  font-size: 72px;
+  font-size: 56px;
   font-weight: 700;
-  color: #fbbf24;
+  color: hwb(125 4% 25%);
 }
 
 .prediction-meta {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   text-align: right;
 }
 
@@ -760,11 +788,11 @@ export default {
 .confidence-bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: #22d3ee;
+  background: #54d10b;
   transition: width 0.3s ease;
 }
 .confidence-bar-fill.highest {
-  background: #06b6d4;
+  background: #4ac807;
 }
 
 .confidence-percent {

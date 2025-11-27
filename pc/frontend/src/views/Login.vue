@@ -135,22 +135,6 @@
               <span v-if="loading" class="loading-spinner"></span>
               {{ loading ? t('login.submitting') : t('login.submit') }}
             </button>
-            <button type="button" class="ghost-btn" @click="loginAsGuest">
-              {{ t('login.guestCta') }}
-            </button>
-
-            <div class="divider">
-              <span>{{ t('login.divider') }}</span>
-            </div>
-
-            <button type="button" class="wechat-btn" @click="handleWechatLogin">
-              <div class="wechat-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#07C160">
-                  <path d="M8.691 4.362C4.792 5.633 2 9.22 2 13.44c0 2.384.928 4.549 2.444 6.165-.137.495-.94 3.347-.94 3.347-.044.255.118.48.352.48a.47.47 0 0 0 .218-.054c.001 0 2.696-1.212 3.372-1.492a11.9 11.9 0 0 0 3.614.554c6.232 0 11.285-4.61 11.285-10.295 0-5.686-5.053-10.295-11.285-10.295zM6.897 8.41a.938.938 0 1 1 0 1.875.938.938 0 0 1 0-1.876zm5.163 0a.938.938 0 1 1 0 1.875.938.938 0 0 1 0-1.876z"/>
-                </svg>
-              </div>
-              {{ t('login.wechat') }}
-            </button>
           </form>
 
           <div class="auth-footer">
@@ -173,7 +157,7 @@ import { useI18n } from '@/i18n'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 
 export default {
-  name: 'Login',
+  name: 'LoginPage',
   components: {
     LanguageSwitcher
   },
@@ -200,7 +184,7 @@ export default {
           password: form.value.password
         })
         
-        router.push({ name: 'DashboardHome' })
+        router.push({ name: 'Home' })
       } catch (error) {
         errorMessage.value = error.message
       } finally {
@@ -220,7 +204,7 @@ export default {
       }
       localStorage.setItem('authToken', 'demo-token')
       localStorage.setItem('user', JSON.stringify(demoUser))
-      router.push({ name: 'DashboardHome' })
+      router.push({ name: 'Home' })
     }
 
     return {

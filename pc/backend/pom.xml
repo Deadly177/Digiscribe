@@ -67,18 +67,6 @@
             <scope>runtime</scope>
         </dependency>
         
-        <!-- Image Processing -->
-        <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-core</artifactId>
-            <version>1.0.0-M2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native-platform</artifactId>
-            <version>1.0.0-M2.1</version>
-        </dependency>
-        
         <!-- MySQL Connector -->
         <dependency>
             <groupId>mysql</groupId>

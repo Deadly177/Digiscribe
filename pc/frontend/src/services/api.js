@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-// Build base URL from env (falls back to local). Trim spaces and trailing slash.
-const rawBase = (import.meta.env.VITE_API_BASE || 'http://localhost:8081/api').trim()
+// Build base URL from env (falls back to Render). Trim spaces and trailing slash.
+const rawBase = (import.meta.env.VITE_API_BASE_URL || 'https://digiscribe-backend.onrender.com').trim()
 const normalizedBase = rawBase.endsWith('/')
   ? rawBase.slice(0, -1)
   : rawBase

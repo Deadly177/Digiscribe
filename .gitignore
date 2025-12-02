@@ -25,3 +25,5 @@ pc/backend/target/
 pc/backend/data/
 pc/ml/models/*.h5
 pc/ml/models/registry.json
+.vscode/
+DigitScribe-mobile 2/

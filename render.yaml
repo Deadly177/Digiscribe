@@ -14,7 +14,7 @@ services:
           name: digiscribe-db
           property: connectionString
       - key: ML_SERVICE_URL
-        value: https://digiscribe-ml.onrender.com/api
+        value: https://digiscribe-ml.onrender.com
       - key: CORS_ORIGINS
         value: https://digiscribe-frontend.onrender.com
 

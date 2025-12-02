@@ -70,14 +70,21 @@ class PredictionRequest(BaseModel):
     timestamp: Optional[str] = None
 
 
+class TrainingHistoryItem(BaseModel):
+    epoch: int
+    loss: float
+    accuracy: float
+    val_loss: float
+    val_accuracy: float
+
+
 class TrainingProgress(BaseModel):
     model_id: str
     status: str
     percentage: int
     current_epoch: int
     total_epochs: int
-    current_loss: Optional[float] = None
-    current_accuracy: Optional[float] = None
+    history: List[TrainingHistoryItem] = []
 
 
 class AccuracyByDigit(BaseModel):
@@ -214,20 +221,39 @@ class ProgressCallback(tf.keras.callbacks.Callback):
         self.model_id = model_id
         self.total_epochs = total_epochs
 
+    def on_batch_end(self, batch, logs=None):
+        if self.model_id in training_jobs and training_jobs[self.model_id].get("stop_requested"):
+            self.model.stop_training = True
+            logger.info("Stop requested for model %s, stopping training immediately.", self.model_id)
+
     def on_epoch_end(self, epoch, logs=None):
         logs = logs or {}
         progress = int(((epoch + 1) / self.total_epochs) * 100)
+
+        if self.model_id in training_jobs and training_jobs[self.model_id].get("stop_requested"):
+            self.model.stop_training = True
+            logger.info("Stop requested for model %s, stopping training.", self.model_id)
+            return
+
         if self.model_id in model_registry:
             model = model_registry[self.model_id]
             model.training_progress = progress
             model.current_epoch = epoch + 1
             model.total_epochs = self.total_epochs
             save_registry()
+
         if self.model_id in training_jobs:
-            training_jobs[self.model_id]["progress"] = progress
-            training_jobs[self.model_id]["current_epoch"] = epoch + 1
-            training_jobs[self.model_id]["loss"] = float(logs.get("loss", 0))
-            training_jobs[self.model_id]["accuracy"] = float(logs.get("accuracy", 0))
+            job = training_jobs[self.model_id]
+            job["progress"] = progress
+            job["current_epoch"] = epoch + 1
+            history_item = {
+                "epoch": epoch + 1,
+                "loss": logs.get("loss"),
+                "accuracy": logs.get("accuracy"),
+                "val_loss": logs.get("val_loss"),
+                "val_accuracy": logs.get("val_accuracy"),
+            }
+            job["history"].append(history_item)
 
 
 def train_model_worker(model_id: str, config: TrainingConfig):
@@ -246,7 +272,7 @@ def train_model_worker(model_id: str, config: TrainingConfig):
                 logger.warning("Unable to load pretrained weights: %s", err)
 
         callbacks = [ProgressCallback(model_id, config.epochs)]
-        history = tf_model.fit(
+        tf_model.fit(
             x_train,
             y_train,
             epochs=config.epochs,
@@ -265,9 +291,12 @@ def train_model_worker(model_id: str, config: TrainingConfig):
         meta.training_samples = x_train.shape[0]
         meta.last_trained = datetime.now().isoformat()
         meta.accuracy = round(float(acc) * 100, 2)
-        meta.status = "idle"
-        meta.training_progress = 100
-        meta.current_epoch = config.epochs
+        job = training_jobs.get(model_id, {})
+        stopped_early = job.get("stop_requested", False)
+
+        meta.status = "idle" if not stopped_early else "stopped"
+        meta.training_progress = 100 if not stopped_early else meta.training_progress
+        meta.current_epoch = config.epochs if not stopped_early else meta.current_epoch
         meta.total_epochs = config.epochs
         meta.model_size_mb = round(model_path.stat().st_size / (1024 * 1024), 2)
         save_registry()
@@ -366,6 +395,8 @@ async def create_model(config: TrainingConfig, background_tasks: BackgroundTasks
         "start_time": datetime.now().isoformat(),
         "progress": 0,
         "current_epoch": 0,
+        "history": [],
+        "stop_requested": False,
     }
     save_registry()
     background_tasks.add_task(train_model_worker, model_id, config)
@@ -408,7 +439,13 @@ async def retrain_model(model_id: str, background_tasks: BackgroundTasks):
     model.status = "training"
     model.training_progress = 0
     model.current_epoch = 0
-    training_jobs[model_id] = {"status": "training", "progress": 0, "current_epoch": 0}
+    training_jobs[model_id] = {
+        "status": "training",
+        "progress": 0,
+        "current_epoch": 0,
+        "history": [],
+        "stop_requested": False,
+    }
     save_registry()
     background_tasks.add_task(train_model_worker, model_id, config)
     return {"message": f"Retraining started for {model.name}"}
@@ -426,9 +463,24 @@ async def get_training_progress(model_id: str):
         percentage=model.training_progress,
         current_epoch=model.current_epoch,
         total_epochs=model.total_epochs,
-        current_loss=job.get("loss"),
-        current_accuracy=job.get("accuracy"),
+        history=job.get("history", []),
     )
+
+
+@app.post("/api/models/{model_id}/stop-training")
+async def stop_training(model_id: str):
+    if model_id not in model_registry:
+        raise HTTPException(status_code=404, detail="Model not found")
+    if model_id not in training_jobs:
+        raise HTTPException(status_code=400, detail="Model is not currently training")
+
+    logger.info("Stop training requested for model %s", model_id)
+    training_jobs[model_id]["stop_requested"] = True
+    model_registry[model_id].status = "stopping"
+    save_registry()
+    logger.info("Model %s status set to 'stopping', will stop after current epoch", model_id)
+
+    return {"message": "Stop request received. Training will halt after the current epoch."}
 
 
 @app.delete("/api/models/{model_id}")

@@ -40,6 +40,11 @@ public class ModelController {
         return mlGatewayService.trainModel(modelId);
     }
 
+    @PostMapping("/{modelId}/stop-training")
+    public Map<String, Object> stopTraining(@PathVariable String modelId) {
+        return mlGatewayService.stopTraining(modelId);
+    }
+
     @GetMapping("/{modelId}/training-progress")
     public TrainingProgressResponse getTrainingProgress(@PathVariable String modelId) {
         return mlGatewayService.getTrainingProgress(modelId);

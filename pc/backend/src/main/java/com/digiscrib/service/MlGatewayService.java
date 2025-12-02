@@ -63,6 +63,12 @@ public class MlGatewayService {
         return response.getBody();
     }
 
+    public Map<String, Object> stopTraining(String modelId) {
+        ResponseEntity<Map> response =
+            restTemplate.postForEntity(mlServiceUrl + "/api/models/" + modelId + "/stop-training", null, Map.class);
+        return response.getBody();
+    }
+
     public TrainingProgressResponse getTrainingProgress(String modelId) {
         ResponseEntity<TrainingProgressResponse> response = restTemplate.getForEntity(
             mlServiceUrl + "/api/models/" + modelId + "/training-progress",

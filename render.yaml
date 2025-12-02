@@ -10,7 +10,7 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: 3.11.0
 
   # Frontend (Vue 3)
   - type: web

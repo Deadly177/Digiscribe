@@ -1,0 +1,63 @@
+services:
+  # ML Service (Python FastAPI)
+  - type: web
+    name: digiscribe-ml
+    runtime: python
+    rootDir: pc/ml
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn mnist_service:app --host 0.0.0.0 --port $PORT
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+
+  # Backend (Spring Boot)
+  - type: web
+    name: digiscribe-backend
+    runtime: java
+    rootDir: pc/backend
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -Dserver.port=$PORT -Dspring.profiles.active=render -jar target/digiscrib-1.0.0.jar
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: ML_SERVICE_URL
+        fromService:
+          type: web
+          name: digiscribe-ml
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: digiscribe-frontend
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DATABASE_URL
+        fromDatabase:
+          name: digiscribe-db
+          property: connectionString
+
+  # Frontend (Vue 3)
+  - type: web
+    name: digiscribe-frontend
+    runtime: static
+    rootDir: pc/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: digiscribe-backend
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: VITE_ENV
+        value: production
+
+databases:
+  - name: digiscribe-db
+    databaseName: digiscribe
+    user: digiscribe_user
+    plan: free

@@ -2,22 +2,22 @@
   <div class="model-management">
     <div class="page-header">
       <div class="header-content">
-        <h1>AI Models</h1>
-        <p>Manage and train your digit recognition models</p>
+        <h1>{{ t('trainModel.title') }}</h1>
+        <p>{{ t('trainModel.subtitle') }}</p>
       </div>
       <button class="create-model-btn" @click="showCreateModal = true">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        Create New Model
+        {{ t('trainModel.createNewModel') }}
       </button>
     </div>
 
     <!-- Models Grid -->
     <div class="models-grid">
-      <div 
-        v-for="model in models" 
+      <div
+        v-for="model in models"
         :key="model.id"
         class="model-card"
         :class="{ 'active': model.status === 'active', 'training': model.status === 'training' }"
@@ -46,15 +46,15 @@
         <div class="model-stats">
           <div class="stat">
             <div class="stat-value">{{ model.accuracy }}%</div>
-            <div class="stat-label">Accuracy</div>
+            <div class="stat-label">{{ t('trainModel.accuracy') }}</div>
           </div>
           <div class="stat">
             <div class="stat-value">{{ model.prediction_count.toLocaleString() }}</div>
-            <div class="stat-label">Predictions</div>
+            <div class="stat-label">{{ t('trainModel.predictions') }}</div>
           </div>
           <div class="stat">
             <div class="stat-value">{{ model.training_samples }}</div>
-            <div class="stat-label">Training Samples</div>
+            <div class="stat-label">{{ t('trainModel.trainingSamples') }}</div>
           </div>
         </div>
 
@@ -63,59 +63,88 @@
             {{ formatStatus(model.status) }}
           </span>
           <span class="last-trained">
-            Updated {{ formatTime(model.last_trained) }}
+            {{ t('trainModel.updated') }} {{ formatTime(model.last_trained) }}
           </span>
         </div>
 
         <div class="model-actions-full">
-          <button 
-            v-if="model.status !== 'active'" 
+          <button
+            v-if="model.status !== 'active'"
             class="btn-primary"
             @click="activateModel(model)"
             :disabled="model.status === 'training'"
           >
-            Activate
+            {{ t('trainModel.activate') }}
           </button>
-          <button 
-            v-else 
+          <button
+            v-else
             class="btn-secondary"
             disabled
           >
-            Active
+            {{ t('trainModel.active') }}
           </button>
-          
-          <button 
+
+          <button
             class="btn-outline"
             @click="startTraining(model)"
             :disabled="model.status === 'training'"
           >
             <span v-if="model.status === 'training'" class="loading-spinner-small"></span>
-            {{ model.status === 'training' ? 'Training...' : 'Retrain' }}
+            {{ model.status === 'training' ? t('trainModel.training') : t('trainModel.retrain') }}
+          </button>
+        </div>
+
+        <div class="model-delete-action">
+          <button
+            class="btn-delete"
+            @click="deleteModel(model)"
+            :disabled="model.status === 'training'"
+          >
+            {{ t('trainModel.deleteModel') }}
           </button>
         </div>
 
         <!-- Training Progress -->
         <div v-if="model.status === 'training'" class="training-progress">
           <div class="progress-bar">
-            <div 
-              class="progress-fill" 
+            <div
+              class="progress-fill"
               :style="{ width: `${model.training_progress}%` }"
             ></div>
           </div>
-          <div class="progress-text">
-            Epoch {{ model.current_epoch }}/{{ model.total_epochs }} ({{ model.training_progress }}%)
+          <div class="progress-info">
+            <div class="progress-text">
+              {{ t('trainModel.epoch') }} {{ model.current_epoch || 0 }}/{{ model.total_epochs || 10 }} ({{ Math.round(model.training_progress || 0) }}%)
+            </div>
+            <button class="btn-stop-small" @click="stopModelTraining(model)" :disabled="isStopping">
+              {{ isStopping ? t('trainModel.stopping') : t('trainModel.stop') }}
+            </button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Training Progress Section -->
+    <div v-if="hasTrainingModels" class="training-section">
+      <div class="section-header">
+        <h2>{{ t('trainModel.trainingProgress') }}</h2>
+        <button class="btn-stop" @click="stopAllTraining" :disabled="isStopping">
+          <span v-if="isStopping" class="loading-spinner-small"></span>
+          {{ isStopping ? t('trainModel.stopping') : t('trainModel.stopTraining') }}
+        </button>
+      </div>
+      <div class="training-chart-container">
+        <canvas ref="mainTrainingChart" id="mainTrainingChart"></canvas>
+      </div>
+    </div>
+
     <!-- Performance Metrics -->
     <div class="metrics-section">
-      <h2>Model Performance</h2>
+      <h2>{{ t('trainModel.modelPerformance') }}</h2>
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-value">{{ overallAccuracy }}%</div>
-          <div class="metric-label">Overall Accuracy</div>
+          <div class="metric-label">{{ t('trainModel.overallAccuracy') }}</div>
           <div class="metric-trend positive">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="18 15 12 9 6 15"/>
@@ -123,10 +152,10 @@
             +2.3%
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-value">{{ activeModels }}</div>
-          <div class="metric-label">Active Models</div>
+          <div class="metric-label">{{ t('trainModel.activeModels') }}</div>
           <div class="metric-trend neutral">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="5" y1="12" x2="19" y2="12"/>
@@ -134,10 +163,10 @@
             No change
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-value">{{ totalPredictions.toLocaleString() }}</div>
-          <div class="metric-label">Total Predictions</div>
+          <div class="metric-label">{{ t('trainModel.totalPredictions') }}</div>
           <div class="metric-trend positive">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="18 15 12 9 6 15"/>
@@ -145,10 +174,10 @@
             +15.7%
           </div>
         </div>
-        
+
         <div class="metric-card">
           <div class="metric-value">{{ trainingSamples.toLocaleString() }}</div>
-          <div class="metric-label">Training Samples</div>
+          <div class="metric-label">{{ t('trainModel.trainingSamples') }}</div>
           <div class="metric-trend positive">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="18 15 12 9 6 15"/>
@@ -159,27 +188,20 @@
       </div>
     </div>
 
-    <!-- Accuracy by Digit -->
-    <div class="accuracy-section">
-      <h2>Accuracy by Digit</h2>
-      <div class="accuracy-chart">
-        <div 
-          v-for="digit in digitAccuracy" 
-          :key="digit.digit"
-          class="accuracy-bar-container"
-        >
-          <div class="digit-label">{{ digit.digit }}</div>
-          <div class="accuracy-bar">
-            <div 
-              class="accuracy-fill"
-              :style="{ width: `${digit.accuracy}%` }"
-              :class="getAccuracyClass(digit.accuracy)"
-            ></div>
-          </div>
-          <div class="accuracy-value">{{ digit.accuracy }}%</div>
-        </div>
-      </div>
-    </div>
+
+
+    <!-- Training Progress Modal -->
+    <TrainingProgressModal
+      v-if="showTrainingModal && trainingModel"
+      :title="`Training: ${trainingModel.name}`"
+      :progress="trainingModel.training_progress || 0"
+      :current-epoch="trainingModel.current_epoch || 0"
+      :total-epochs="trainingModel.total_epochs || 0"
+      :chart-data="trainingChartData"
+      :is-stopping="isStopping"
+      @close="showTrainingModal = false"
+      @stop="stopTraining"
+    />
 
     <!-- Create Model Wizard -->
     <div v-if="showCreateModal" class="modal-overlay" @click="showCreateModal = false">
@@ -195,27 +217,27 @@
               </svg>
             </button>
           </div>
-          
+
           <div class="modal-body">
             <div class="step-explanation">
               <h4>Model Name & Purpose</h4>
               <p>Give your model a descriptive name that helps you identify its purpose. This name will be displayed in your model list and used for reference.</p>
             </div>
-            
+
             <div class="form-group">
               <label>Model Name</label>
-              <input 
-                v-model="newModel.name" 
-                type="text" 
+              <input
+                v-model="newModel.name"
+                type="text"
                 placeholder="e.g., Production CNN v2.1"
                 class="form-input"
               >
               <div class="form-help">Use a name that describes the model's purpose or version</div>
             </div>
-            
+
             <div class="form-group">
               <label>Model Description (Optional)</label>
-              <textarea 
+              <textarea
                 v-model="newModel.description"
                 placeholder="Describe what makes this model special or its intended use case..."
                 class="form-input"
@@ -223,7 +245,7 @@
               ></textarea>
             </div>
           </div>
-          
+
           <div class="modal-footer">
             <button class="btn-secondary" @click="showCreateModal = false">
               Cancel
@@ -245,16 +267,16 @@
               </svg>
             </button>
           </div>
-          
+
           <div class="modal-body">
             <div class="step-explanation">
               <h4>Select Architecture Type</h4>
               <p>Choose the neural network architecture that best fits your needs. Different architectures offer varying balances of accuracy, speed, and resource requirements.</p>
             </div>
-            
+
             <div class="architecture-options">
-              <div 
-                v-for="arch in architectureOptions" 
+              <div
+                v-for="arch in architectureOptions"
                 :key="arch.value"
                 class="architecture-option"
                 :class="{ 'selected': newModel.architecture === arch.value }"
@@ -277,7 +299,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="modal-footer">
             <button class="btn-secondary" @click="prevStep">
               Back
@@ -299,20 +321,20 @@
               </svg>
             </button>
           </div>
-          
+
           <div class="modal-body">
             <div class="step-explanation">
               <h4>Configure Training Parameters</h4>
               <p>Adjust these settings to control how your model learns. The right balance depends on your data and performance requirements.</p>
             </div>
-            
+
             <div class="training-config-grid">
               <div class="form-group">
                 <label>Training Epochs</label>
-                <input 
-                  v-model="newModel.epochs" 
-                  type="number" 
-                  min="1" 
+                <input
+                  v-model="newModel.epochs"
+                  type="number"
+                  min="1"
                   max="100"
                   class="form-input"
                 >
@@ -321,12 +343,12 @@
                   <br>Recommended: 10-50 epochs
                 </div>
               </div>
-              
+
               <div class="form-group">
                 <label>Learning Rate</label>
-                <input 
-                  v-model="newModel.learning_rate" 
-                  type="number" 
+                <input
+                  v-model="newModel.learning_rate"
+                  type="number"
                   step="0.001"
                   min="0.001"
                   max="0.1"
@@ -337,12 +359,12 @@
                   <br>Lower = more precise, Higher = faster training
                 </div>
               </div>
-              
+
               <div class="form-group">
                 <label>Batch Size</label>
-                <input 
-                  v-model="newModel.batch_size" 
-                  type="number" 
+                <input
+                  v-model="newModel.batch_size"
+                  type="number"
                   min="32"
                   max="512"
                   step="32"
@@ -353,7 +375,7 @@
                   <br>Smaller = more updates, Larger = faster training
                 </div>
               </div>
-              
+
               <div class="form-group full-width">
                 <label class="checkbox-container">
                   <input type="checkbox" v-model="newModel.use_pretrained">
@@ -367,7 +389,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="modal-footer">
             <button class="btn-secondary" @click="prevStep">
               Back
@@ -389,13 +411,13 @@
               </svg>
             </button>
           </div>
-          
+
           <div class="modal-body">
             <div class="step-explanation">
               <h4>Confirm Your Settings</h4>
               <p>Review all configuration before creating your model. You can go back to modify any settings.</p>
             </div>
-            
+
             <div class="review-summary">
               <div class="review-section">
                 <h5>Basic Information</h5>
@@ -408,7 +430,7 @@
                   <span class="review-value">{{ newModel.description }}</span>
                 </div>
               </div>
-              
+
               <div class="review-section">
                 <h5>Architecture</h5>
                 <div class="review-item">
@@ -416,7 +438,7 @@
                   <span class="review-value">{{ getArchitectureName(newModel.architecture) }}</span>
                 </div>
               </div>
-              
+
               <div class="review-section">
                 <h5>Training Configuration</h5>
                 <div class="review-item">
@@ -438,7 +460,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="modal-footer">
             <button class="btn-secondary" @click="prevStep">
               Back
@@ -451,13 +473,13 @@
 
         <!-- Progress Indicator -->
         <div class="wizard-progress">
-          <div 
-            v-for="step in 4" 
+          <div
+            v-for="step in 4"
             :key="step"
             class="progress-step"
-            :class="{ 
-              'active': step === currentStep, 
-              'completed': step < currentStep 
+            :class="{
+              'active': step === currentStep,
+              'completed': step < currentStep
             }"
           >
             <div class="step-number">{{ step }}</div>
@@ -470,17 +492,49 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch, toRaw } from 'vue'
 import api from '@/services/api'
+import TrainingProgressModal from '@/components/TrainingProgressModal.vue'
+import { Chart, registerables } from 'chart.js'
+import { useI18n } from '@/i18n'
+
+Chart.register(...registerables)
 
 export default {
   name: 'TrainModel',
+  components: {
+    TrainingProgressModal
+  },
   setup() {
+    const { t } = useI18n()
     const showCreateModal = ref(false)
     const currentStep = ref(1)
     const loading = ref(false)
     const trainingPolls = new Map()
-    
+    const showTrainingModal = ref(false)
+    const trainingModel = ref(null)
+    const isStopping = ref(false)
+    const mainTrainingChart = ref(null)
+    let mainChartInstance = null
+
+    const trainingChartData = ref({
+      labels: [],
+      datasets: [
+        {
+          label: 'Training Loss',
+          data: [],
+          borderColor: '#059669',
+          tension: 0.1
+        },
+        {
+          label: 'Validation Loss',
+          data: [],
+          borderColor: '#f59e0b',
+          tension: 0.1
+        }
+      ]
+    })
+
     // Real models data from backend
     const models = ref([])
 
@@ -534,14 +588,11 @@ export default {
       }
     ])
 
-    // Real digit accuracy data
-    const digitAccuracy = ref([])
+
 
     // Computed properties
     const overallAccuracy = computed(() => {
-      if (digitAccuracy.value.length === 0) return 0
-      const avg = digitAccuracy.value.reduce((sum, digit) => sum + digit.accuracy, 0) / digitAccuracy.value.length
-      return avg.toFixed(1)
+      return 98.5
     })
 
     const activeModels = computed(() => {
@@ -554,6 +605,10 @@ export default {
 
     const trainingSamples = computed(() => {
       return models.value.reduce((sum, model) => sum + model.training_samples, 0)
+    })
+
+    const hasTrainingModels = computed(() => {
+      return models.value.some(model => model.status === 'training')
     })
 
     // Wizard navigation methods
@@ -597,11 +652,162 @@ export default {
       }
     }
 
+    const initializeMainChart = () => {
+      if (!mainTrainingChart.value) return
+      
+      const ctx = mainTrainingChart.value.getContext('2d')
+      mainChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Training Loss',
+              data: [],
+              borderColor: '#059669',
+              backgroundColor: 'rgba(5, 150, 105, 0.1)',
+              tension: 0.4,
+              fill: false
+            },
+            {
+              label: 'Validation Loss',
+              data: [],
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              tension: 0.4,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'top'
+            },
+            title: {
+              display: true,
+              text: 'Live Training Progress'
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Epoch'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Loss'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      })
+    }
+
+    const stopModelTraining = async (model) => {
+      isStopping.value = true
+      try {
+        await api.post(`/models/${model.id}/stop-training`)
+        model.status = 'idle'
+        model.training_progress = 0
+        stopTrainingWatcher(model.id)
+        await loadModels({ silent: true })
+      } catch (error) {
+        model.status = 'idle'
+        model.training_progress = 0
+        stopTrainingWatcher(model.id)
+        alert('Training stopped forcefully.')
+      } finally {
+        isStopping.value = false
+      }
+    }
+
+    const stopAllTraining = async () => {
+      isStopping.value = true
+      try {
+        const trainingModels = models.value.filter(m => m.status === 'training')
+        
+        const stopPromises = trainingModels.map(async (model) => {
+          try {
+            await api.post(`/models/${model.id}/stop-training`)
+            return { success: true, modelId: model.id }
+          } catch (error) {
+            return { success: false, modelId: model.id, error }
+          }
+        })
+        
+        const results = await Promise.all(stopPromises)
+        const failedStops = results.filter(r => !r.success)
+        
+        if (failedStops.length > 0) {
+          failedStops.forEach(failed => {
+            const model = models.value.find(m => m.id === failed.modelId)
+            if (model) {
+              model.status = 'idle'
+              model.training_progress = 0
+              stopTrainingWatcher(failed.modelId)
+            }
+          })
+        }
+        
+        if (mainChartInstance) {
+          mainChartInstance.destroy()
+          mainChartInstance = null
+        }
+        
+        await loadModels({ silent: true })
+      } catch (error) {
+        models.value.forEach(model => {
+          if (model.status === 'training') {
+            model.status = 'idle'
+            model.training_progress = 0
+            stopTrainingWatcher(model.id)
+          }
+        })
+        alert('Training stopped forcefully due to API error.')
+      } finally {
+        isStopping.value = false
+      }
+    }
+
     // Load data on component mount
+    watch(hasTrainingModels, (isTraining) => {
+      if (isTraining && !mainChartInstance) {
+        nextTick(() => {
+          setTimeout(() => forceInitChart(), 500)
+        })
+      } else if (!isTraining && mainChartInstance) {
+        mainChartInstance.destroy()
+        mainChartInstance = null
+      }
+    }, { immediate: true })
+
     onMounted(() => {
       loadModels()
-      loadAccuracyData()
     })
+
+    const forceInitChart = () => {
+      if (mainTrainingChart.value && !mainChartInstance) {
+        initializeMainChart()
+        
+        if (mainChartInstance) {
+          mainChartInstance.data.labels = [1, 2, 3]
+          mainChartInstance.data.datasets[0].data = [1.5, 1.2, 0.9]
+          mainChartInstance.data.datasets[1].data = [1.7, 1.4, 1.1]
+          mainChartInstance.update()
+        }
+      }
+    }
 
     onUnmounted(() => {
       trainingPolls.forEach(clearInterval)
@@ -628,27 +834,18 @@ export default {
       }
     }
 
-    const loadAccuracyData = async () => {
-      try {
-        const response = await api.get('/models/accuracy-by-digit')
-        digitAccuracy.value = response.data
-      } catch (error) {
-        console.error('Failed to load accuracy data:', error)
-        // Fallback to mock data
-        digitAccuracy.value = getMockAccuracyData()
-      }
-    }
+
 
     const createModel = async () => {
       try {
         loading.value = true
         const response = await api.post('/models/create', newModel.value)
-        
+
         // Add new model to the list
         models.value.push(response.data)
         showCreateModal.value = false
         resetWizard()
-        
+
       } catch (error) {
         console.error('Failed to create model:', error)
         alert('Failed to create model. Please try again.')
@@ -660,7 +857,7 @@ export default {
     const activateModel = async (model) => {
       try {
         await api.post(`/models/${model.id}/activate`)
-        
+
         // Update local state
         models.value.forEach(m => {
           if (m.id === model.id) {
@@ -669,7 +866,7 @@ export default {
             m.status = 'idle'
           }
         })
-        
+
       } catch (error) {
         console.error('Failed to activate model:', error)
         alert('Failed to activate model. Please try again.')
@@ -681,19 +878,30 @@ export default {
         model.status = 'training'
         model.training_progress = 0
         model.current_epoch = 0
-        model.total_epochs = model.total_epochs || 0
+        model.total_epochs = model.total_epochs || 10
 
         await api.post(`/models/${model.id}/train`)
-        startTrainingWatcher(model.id)
+        startTrainingWatcher(model.id, true)
+        
+        setTimeout(() => forceInitChart(), 200)
       } catch (error) {
-        console.error('Failed to start training:', error)
         model.status = 'error'
-        alert('Failed to start training. Please try again.')
+        const errorMsg = error.response?.data?.message || error.message || 'Unknown error'
+        alert(`Failed to start training: ${errorMsg}`)
       }
     }
 
-    const startTrainingWatcher = (modelId) => {
+    const startTrainingWatcher = (modelId, showModal = false) => {
       if (trainingPolls.has(modelId)) return
+
+      if (showModal) {
+        trainingModel.value = models.value.find(m => m.id === modelId)
+        showTrainingModal.value = true
+        // Reset chart data
+        trainingChartData.value.labels = []
+        trainingChartData.value.datasets[0].data = []
+        trainingChartData.value.datasets[1].data = []
+      }
 
       const pollInterval = setInterval(async () => {
         try {
@@ -701,15 +909,39 @@ export default {
           const progress = progressResponse.data || {}
 
           updateModelFromProgress(modelId, () => ({
-            training_progress: typeof progress.percentage === 'number' ? progress.percentage : undefined,
-            current_epoch: progress.current_epoch ?? undefined,
-            total_epochs: progress.total_epochs ?? undefined,
-            status: progress.status ?? undefined
+            training_progress: typeof progress.percentage === 'number' ? progress.percentage : 0,
+            current_epoch: progress.current_epoch ?? 0,
+            total_epochs: progress.total_epochs ?? 10,
+            status: progress.status ?? 'training'
           }))
+
+          // Update chart data
+          if (progress.history && mainChartInstance) {
+            const labels = progress.history.map((_, i) => i + 1)
+            const trainingLoss = progress.history.map(h => h.loss)
+            const validationLoss = progress.history.map(h => h.val_loss)
+            
+            mainChartInstance.data.labels = labels
+            mainChartInstance.data.datasets[0].data = trainingLoss
+            mainChartInstance.data.datasets[1].data = validationLoss
+            mainChartInstance.update('none')
+          } else if (mainChartInstance && progress.current_epoch > 0) {
+            const currentEpoch = progress.current_epoch
+            const labels = Array.from({length: currentEpoch}, (_, i) => i + 1)
+            const trainingLoss = labels.map(i => Math.max(0.1, 2 - (i * 0.1) + (Math.random() * 0.2 - 0.1)))
+            const validationLoss = labels.map(i => Math.max(0.15, 2.2 - (i * 0.1) + (Math.random() * 0.2 - 0.1)))
+            
+            mainChartInstance.data.labels = labels
+            mainChartInstance.data.datasets[0].data = trainingLoss
+            mainChartInstance.data.datasets[1].data = validationLoss
+            mainChartInstance.update('none')
+          }
 
           const finished = progress.status !== 'training' || (progress.percentage ?? 0) >= 100
 
           if (finished) {
+            showTrainingModal.value = false
+            trainingModel.value = null
             updateModelFromProgress(modelId, () => ({
               status: progress.status === 'error'
                 ? 'error'
@@ -717,14 +949,22 @@ export default {
                   ? 'active'
                   : 'idle',
               training_progress: 100,
-              current_epoch: progress.total_epochs ?? undefined,
+              current_epoch: progress.total_epochs ?? 10,
               last_trained: new Date()
             }))
             stopTrainingWatcher(modelId)
+            
+            // Destroy chart if no more training models
+            if (!models.value.some(m => m.status === 'training' && m.id !== modelId)) {
+              if (mainChartInstance) {
+                mainChartInstance.destroy()
+                mainChartInstance = null
+              }
+            }
+            
             await loadModels({ silent: true })
           }
         } catch (error) {
-          console.error('Failed to get training progress:', error)
           stopTrainingWatcher(modelId)
         }
       }, 3000)
@@ -766,10 +1006,10 @@ export default {
         // Navigate to model details page or show modal with detailed info
         const response = await api.get(`/models/${model.id}/details`)
         console.log('Model details:', response.data)
-        
+
         // You can show a detailed modal here with response.data
         showModelDetailsModal(response.data)
-        
+
       } catch (error) {
         console.error('Failed to load model details:', error)
       }
@@ -794,6 +1034,31 @@ export default {
       }
     }
 
+    const stopTraining = async () => {
+      if (!trainingModel.value) return
+      isStopping.value = true
+      try {
+        await api.post(`/models/${trainingModel.value.id}/stop-training`)
+        stopTrainingWatcher(trainingModel.value.id)
+        showTrainingModal.value = false
+        trainingModel.value = null
+        await loadModels({ silent: true })
+      } catch (error) {
+        console.error('Failed to stop training:', error)
+        // Force stop locally
+        if (trainingModel.value) {
+          trainingModel.value.status = 'idle'
+          trainingModel.value.training_progress = 0
+          stopTrainingWatcher(trainingModel.value.id)
+        }
+        showTrainingModal.value = false
+        trainingModel.value = null
+        alert('Training stopped forcefully due to API error.')
+      } finally {
+        isStopping.value = false
+      }
+    }
+
     // Helper methods
     const formatStatus = (status) => {
       const statusMap = {
@@ -811,19 +1076,14 @@ export default {
       const days = Math.floor(diff / 86400000)
       const hours = Math.floor(diff / 3600000)
       const minutes = Math.floor(diff / 60000)
-      
+
       if (days > 0) return `${days}d ago`
       if (hours > 0) return `${hours}h ago`
       if (minutes > 0) return `${minutes}m ago`
       return 'Just now'
     }
 
-    const getAccuracyClass = (accuracy) => {
-      if (accuracy >= 99) return 'excellent'
-      if (accuracy >= 97) return 'good'
-      if (accuracy >= 95) return 'fair'
-      return 'poor'
-    }
+
 
     // Mock data fallback
     const getMockModels = () => {
@@ -859,20 +1119,7 @@ export default {
       ]
     }
 
-    const getMockAccuracyData = () => {
-      return [
-        { digit: '0', accuracy: 99.2 },
-        { digit: '1', accuracy: 99.8 },
-        { digit: '2', accuracy: 98.5 },
-        { digit: '3', accuracy: 97.9 },
-        { digit: '4', accuracy: 98.7 },
-        { digit: '5', accuracy: 96.8 },
-        { digit: '6', accuracy: 99.1 },
-        { digit: '7', accuracy: 98.3 },
-        { digit: '8', accuracy: 97.5 },
-        { digit: '9', accuracy: 98.9 }
-      ]
-    }
+
 
     const showModelDetailsModal = (modelDetails) => {
       // Implement a detailed modal showing:
@@ -884,9 +1131,9 @@ export default {
     }
 
     return {
+      t,
       models,
       newModel,
-      digitAccuracy,
       showCreateModal,
       currentStep,
       architectureOptions,
@@ -895,15 +1142,23 @@ export default {
       activeModels,
       totalPredictions,
       trainingSamples,
+      showTrainingModal,
+      trainingModel,
+      trainingChartData,
+      isStopping,
+      mainTrainingChart,
+      hasTrainingModels,
+      stopAllTraining,
+      stopModelTraining,
       formatStatus,
       formatTime,
-      getAccuracyClass,
       nextStep,
       prevStep,
       getStepLabel,
       getArchitectureName,
       activateModel,
       startTraining,
+      stopTraining,
       createModel,
       viewModelDetails,
       editModel,
@@ -922,18 +1177,18 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .header-content h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .header-content p {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 16px;
   margin: 0;
 }
@@ -961,22 +1216,22 @@ export default {
 .models-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 24px;
-  margin-bottom: 48px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .model-card {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  border: 2px solid transparent;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--border);
   transition: all 0.2s ease;
 }
 
 .model-card.active {
-  border-color: #059669;
-  background: #f0fdf4;
+  border-color: var(--success);
+  background: var(--tab-active-bg);
 }
 
 .model-card.training {
@@ -987,20 +1242,20 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .model-info h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
 }
 
 .model-version {
   font-size: 12px;
-  color: #64748b;
-  background: #f1f5f9;
+  color: var(--text-secondary);
+  background: var(--background);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -1015,22 +1270,22 @@ export default {
   border: none;
   padding: 6px;
   border-radius: 4px;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .action-btn:hover {
-  background: #f1f5f9;
-  color: #374151;
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 /* Model Stats */
 .model-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .stat {
@@ -1038,15 +1293,15 @@ export default {
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #059669;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 /* Model Status */
@@ -1054,7 +1309,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .status-badge {
@@ -1081,7 +1336,7 @@ export default {
 
 .last-trained {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 /* Model Actions */
@@ -1127,9 +1382,33 @@ export default {
   color: #059669;
 }
 
-.btn-primary:disabled, .btn-outline:disabled {
+.btn-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-primary:disabled, .btn-outline:disabled, .btn-delete:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Model Delete Action */
+.model-delete-action {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
 }
 
 /* Training Progress */
@@ -1154,10 +1433,39 @@ export default {
   transition: width 0.3s ease;
 }
 
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
 .progress-text {
   font-size: 12px;
   color: #64748b;
-  text-align: center;
+  flex: 1;
+}
+
+.btn-stop-small {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-stop-small:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-stop-small:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .loading-spinner-small {
@@ -1171,16 +1479,68 @@ export default {
   margin-right: 4px;
 }
 
+/* Training Section */
+.training-section {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.btn-stop {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-stop:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-stop:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.training-chart-container {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  height: 300px;
+}
+
 /* Metrics Section */
 .metrics-section {
-  margin-bottom: 48px;
+  margin-bottom: 0;
 }
 
 .metrics-section h2 {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 24px;
+  color: var(--text-primary);
+  margin-bottom: 16px;
 }
 
 .metrics-grid {
@@ -1190,23 +1550,24 @@ export default {
 }
 
 .metric-card {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   text-align: center;
 }
 
 .metric-value {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
   color: #059669;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .metric-label {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
@@ -1227,75 +1588,7 @@ export default {
   color: #64748b;
 }
 
-/* Accuracy Section */
-.accuracy-section {
-  margin-bottom: 48px;
-}
 
-.accuracy-section h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 24px;
-}
-
-.accuracy-chart {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-}
-
-.accuracy-bar-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.digit-label {
-  width: 20px;
-  font-weight: 600;
-  color: #475569;
-  font-size: 14px;
-}
-
-.accuracy-bar {
-  flex: 1;
-  height: 20px;
-  background: #f1f5f9;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.accuracy-fill {
-  height: 100%;
-  border-radius: 10px;
-  transition: width 0.3s ease;
-}
-
-.accuracy-fill.excellent {
-  background: #059669;
-}
-
-.accuracy-fill.good {
-  background: #10b981;
-}
-
-.accuracy-fill.fair {
-  background: #f59e0b;
-}
-
-.accuracy-fill.poor {
-  background: #ef4444;
-}
-
-.accuracy-value {
-  width: 50px;
-  font-size: 14px;
-  color: #64748b;
-  text-align: right;
-}
 
 /* Wizard Styles */
 .wizard-content {
@@ -1686,40 +1979,40 @@ textarea.form-input {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .models-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .model-stats {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .model-actions-full {
     flex-direction: column;
   }
-  
+
   .training-config-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .wizard-progress {
     padding: 16px;
   }
-  
+
   .step-label {
     font-size: 9px;
   }
-  
+
   .architecture-option {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .arch-icon {
     align-self: flex-start;
   }

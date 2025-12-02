@@ -34,6 +34,9 @@ export default {
   --border: #e2e8f0;
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --tab-bg: #f8fafc;
+  --tab-active-bg: #ffffff;
+  --tab-active-border: #10b981;
 }
 
 :root[data-theme='dark'] {
@@ -46,11 +49,14 @@ export default {
   --error: #f87171;
   --background: #0b1120;
   --surface: #0f172a;
-  --text-primary: #e2e8f0;
+  --text-primary: #ffffff;
   --text-secondary: #94a3b8;
   --border: #1f2937;
   --shadow: 0 6px 16px rgb(0 0 0 / 0.35);
   --shadow-lg: 0 12px 24px rgb(0 0 0 / 0.4);
+  --tab-bg: #0b1120;
+  --tab-active-bg: #0f172a;
+  --tab-active-border: #22c55e;
 }
 
 body {

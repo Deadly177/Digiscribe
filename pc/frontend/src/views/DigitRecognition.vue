@@ -2,51 +2,51 @@
   <div class="digit-recognition">
     <div class="page-header">
       <div>
-        <h1>Digit Recognition</h1>
-        <p>Draw a digit, analyze confidence, and track system performance.</p>
+        <h1>{{ t('recognition.title') }}</h1>
+        <p>{{ t('recognition.subtitle') }}</p>
       </div>
       <div class="header-actions">
         <button class="ghost-btn" @click="loadInsights">
-          Refresh Insights
+          {{ t('recognition.refreshInsights') }}
         </button>
       </div>
     </div>
 
     <div class="insights" v-if="!insightsLoading">
       <div class="insight-card">
-        <span>Total Predictions</span>
+        <span>{{ t('recognition.totalPredictions') }}</span>
         <strong>{{ systemStats.totalPredictions.toLocaleString() }}</strong>
       </div>
       <div class="insight-card">
-        <span>Activated Model</span>
-        <strong>{{ activeModelName || 'Not set' }}</strong>
+        <span>{{ t('recognition.activatedModel') }}</span>
+        <strong>{{ activeModelName || t('recognition.notSet') }}</strong>
       </div>
       <div class="insight-card">
-        <span>Active Models</span>
+        <span>{{ t('recognition.activeModels') }}</span>
         <strong>{{ systemStats.activeModels }}</strong>
       </div>
       <div class="insight-card">
-        <span>Feedback Logged</span>
+        <span>{{ t('recognition.feedbackLogged') }}</span>
         <strong>{{ systemStats.feedbackCount }}</strong>
       </div>
     </div>
     <div v-else class="insights loading">
       <div class="insight-card loading-card">
-        <span>Loading insights...</span>
+        <span>{{ t('recognition.loadingInsights') }}</span>
       </div>
     </div>
 
     <div class="recognition-grid">
       <div class="drawing-panel">
         <div class="panel-header">
-          <h2>Canvas</h2>
-          <span>Optimized for stylus or mouse input</span>
+          <h2>{{ t('recognition.canvas') }}</h2>
+          <span>{{ t('recognition.canvasSubtitle') }}</span>
         </div>
         <div class="canvas-container">
           <canvas
             ref="canvas"
             width="280"
-            height="280"
+            height="252"
             class="drawing-canvas"
             @mousedown="startDrawing"
             @mousemove="draw"
@@ -62,25 +62,12 @@
         </div>
         <div class="drawing-controls">
           <button class="control-btn secondary" @click="clearCanvas">
-            Clear Canvas
+            {{ t('recognition.clearCanvas') }}
           </button>
           <button class="control-btn primary" @click="predictDigit" :disabled="loading">
             <span v-if="loading" class="loading-spinner"></span>
-            {{ loading ? 'Analyzing...' : 'Predict Digit' }}
+            {{ loading ? t('recognition.analyzing') : t('recognition.predictDigit') }}
           </button>
-        </div>
-        <div class="quick-actions">
-          <h3>Quick Test</h3>
-          <div class="quick-digits">
-            <button
-              v-for="digit in [0,1,2,3,4,5,6,7,8,9]"
-              :key="digit"
-              class="digit-btn"
-              @click="loadTestDigit(digit)"
-            >
-              {{ digit }}
-            </button>
-          </div>
         </div>
       </div>
 
@@ -88,33 +75,33 @@
         <div class="flex-row">
           <div class="card prediction-card">
             <div class="panel-header">
-              <h2>Prediction Result</h2>
+              <h2>{{ t('recognition.predictionResult') }}</h2>
               <span v-if="currentPrediction">Model {{ currentPrediction.model_used || 'Active' }}</span>
             </div>
             <div v-if="currentPrediction" class="prediction-result">
               <div class="predicted-digit">{{ currentPrediction.predicted_digit }}</div>
               <div class="prediction-meta">
                 <div>
-                  <span>Confidence</span>
+                  <span>{{ t('recognition.confidence') }}</span>
                   <strong>&nbsp;{{ (currentPrediction.confidence * 100).toFixed(1) }}%</strong>
                 </div>
                 <div>
-                  <span>Processing Time</span>
+                  <span>{{ t('recognition.processingTime') }}</span>
                   <strong>&nbsp;{{ currentPrediction.processing_time }} ms</strong>
                 </div>
               </div>
             </div>
             <div v-else class="empty-state">
               <div class="placeholder-icon">?</div>
-              <p>Draw a digit to see prediction.</p>
+              <p>{{ t('recognition.drawDigit') }}</p>
             </div>
           </div>
         </div>
 
         <div class="card confidence-card">
           <div class="panel-header">
-            <h2>Confidence Distribution</h2>
-            <span v-if="currentPrediction">Highest bar marks predicted digit.</span>
+            <h2>{{ t('recognition.confidenceDistribution') }}</h2>
+            <span v-if="currentPrediction">{{ t('recognition.highestBar') }}</span>
           </div>
           <div class="confidence-bars">
             <div
@@ -145,12 +132,12 @@
 
         <div class="card history-card">
           <div class="panel-header">
-            <h2>Recent Predictions</h2>
-            <span>Most recent interactions in this session.</span>
+            <h2>{{ t('recognition.recentPredictions') }}</h2>
+            <span>{{ t('recognition.recentSubtitle') }}</span>
           </div>
           <div class="predictions-list">
             <div
-              v-for="prediction in recentPredictions"
+              v-for="prediction in recentPredictions.slice(0, 5)"
               :key="prediction.id"
               class="prediction-item"
             >
@@ -171,7 +158,7 @@
               </div>
             </div>
             <div v-if="recentPredictions.length === 0" class="no-history">
-              Predictions will show here as you interact.
+              {{ t('recognition.noHistory') }}
             </div>
           </div>
         </div>
@@ -183,10 +170,12 @@
 <script>
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
+import { useI18n } from '@/i18n'
 
 export default {
   name: 'DigitRecognition',
   setup() {
+    const { t } = useI18n()
     const PREDICTION_CACHE_KEY = 'digit_recognition_model_counts'
     const RECENT_PREDICTIONS_KEY = 'digit_recognition_recent_predictions'
     const canvas = ref(null)
@@ -232,7 +221,7 @@ export default {
       try {
         localStorage.setItem(
           RECENT_PREDICTIONS_KEY,
-          JSON.stringify(list.slice(0, 10))
+          JSON.stringify(list)
         )
       } catch (e) {
         // ignore storage errors
@@ -384,10 +373,7 @@ export default {
           systemStats.value.totalPredictions += 1
         }
 
-        // Keep only last 10 predictions and persist to localStorage
-        if (recentPredictions.value.length > 10) {
-          recentPredictions.value = recentPredictions.value.slice(0, 10)
-        }
+        // Save all predictions to localStorage
         saveRecentToStorage(recentPredictions.value)
 
       } catch (error) {
@@ -497,6 +483,7 @@ export default {
     }
 
     return {
+      t,
       canvas,
       isDrawing,
       loading,
@@ -515,7 +502,6 @@ export default {
       drawTouch,
       predictDigit,
       submitFeedback,
-      loadTestDigit,
       formatTime
     }
   }
@@ -584,7 +570,7 @@ export default {
 }
 .insight-card.loading-card {
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .recognition-grid {
@@ -644,8 +630,8 @@ export default {
   width: 100%;
   height: 100%;
   background-image:
-    linear-gradient(#1f2937 1px, transparent 1px),
-    linear-gradient(90deg, #1f2937 1px, transparent 1px);
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 28px 28px;
   opacity: 0.4;
 }
@@ -667,13 +653,13 @@ export default {
 }
 
 .control-btn.secondary {
-  background: #1f2937;
-  color: #e2e8f0;
-  border: 1px solid #1f2937;
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
 }
 
 .control-btn.primary {
-  background: #16a34a;
+  background: var(--success);
   color: white;
 }
 
@@ -693,31 +679,6 @@ export default {
   animation: spin 1s linear infinite;
 }
 
-.quick-actions h3 {
-  margin-bottom: 12px;
-  font-size: 16px;
-}
-
-.quick-digits {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.digit-btn {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text-primary);
-  font-size: 16px;
-  padding: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.digit-btn:hover {
-  background: var(--border);
-}
-
 .analysis-panel .flex-row {
   display: grid;
   grid-template-columns: 1fr;
@@ -734,7 +695,7 @@ export default {
 .predicted-digit {
   font-size: 56px;
   font-weight: 700;
-  color: hwb(125 4% 25%);
+  color: var(--success);
 }
 
 .prediction-meta {
@@ -745,7 +706,7 @@ export default {
 }
 
 .prediction-meta span {
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 .prediction-meta strong {
@@ -754,7 +715,7 @@ export default {
 
 .empty-state {
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 .empty-state.small {
   font-size: 14px;
@@ -780,19 +741,19 @@ export default {
 .confidence-bar-background {
   flex: 1;
   height: 16px;
-  background: #0b1120;
+  background: var(--background);
   border-radius: 999px;
-  border: 1px solid #1f2937;
+  border: 1px solid var(--border);
 }
 
 .confidence-bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: #54d10b;
+  background: var(--success);
   transition: width 0.3s ease;
 }
 .confidence-bar-fill.highest {
-  background: #4ac807;
+  background: var(--primary);
 }
 
 .confidence-percent {
@@ -809,9 +770,9 @@ export default {
 .feedback-btn {
   flex: 1;
   border-radius: 10px;
-  border: 1px solid #1f2937;
+  border: 1px solid var(--border);
   padding: 10px;
-  background: #0b1120;
+  background: var(--background);
 }
 .feedback-btn.correct:hover:not(:disabled) {
   background: #064e3b;
@@ -826,7 +787,7 @@ export default {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid var(--border);
 }
 .prediction-item:last-child {
   border-bottom: none;
@@ -845,12 +806,12 @@ export default {
   gap: 12px;
   align-items: center;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 .prediction-status {
   padding: 2px 8px;
   border-radius: 20px;
-  background: #1f2937;
+  background: var(--surface);
 }
 .prediction-status.correct {
   color: #22c55e;
@@ -862,7 +823,7 @@ export default {
 .no-history {
   text-align: center;
   padding: 12px 0;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 @keyframes spin {

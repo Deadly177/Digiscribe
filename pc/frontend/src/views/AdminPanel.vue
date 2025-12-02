@@ -1,8 +1,8 @@
 <template>
   <div class="admin-panel">
     <div class="page-header">
-      <h1>Admin Panel</h1>
-      <p>Manage users, monitor system health, and configure settings</p>
+      <h1>{{ t('admin.title') }}</h1>
+      <p>{{ t('admin.subtitle') }}</p>
     </div>
 
     <!-- Quick Stats -->
@@ -18,7 +18,7 @@
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.totalUsers }}</div>
-          <div class="stat-label">Total Users</div>
+          <div class="stat-label">{{ t('admin.totalUsers') }}</div>
           <div class="stat-change positive">+12 this week</div>
         </div>
       </div>
@@ -31,7 +31,7 @@
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.totalPredictions.toLocaleString() }}</div>
-          <div class="stat-label">Total Predictions</div>
+          <div class="stat-label">{{ t('admin.totalPredictions') }}</div>
           <div class="stat-change positive">+1,234 today</div>
         </div>
       </div>
@@ -45,7 +45,7 @@
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.systemAccuracy }}%</div>
-          <div class="stat-label">System Accuracy</div>
+          <div class="stat-label">{{ t('admin.systemAccuracy') }}</div>
           <div class="stat-change positive">+2.1%</div>
         </div>
       </div>
@@ -62,9 +62,9 @@
           </svg>
         </div>
         <div class="stat-info">
-          <div class="stat-value">{{ stats.storageUsed }}GB</div>
-          <div class="stat-label">Storage Used</div>
-          <div class="stat-change warning">65% full</div>
+          <div class="stat-value">{{ stats.storageUsed }}MB</div>
+          <div class="stat-label">{{ t('admin.storageUsed') }}</div>
+          <div class="stat-change positive">{{ (stats.storageUsed / 100 * 100).toFixed(0) }}% of 100MB</div>
         </div>
       </div>
     </div>
@@ -87,14 +87,14 @@
         <!-- Users Management -->
         <div v-if="activeTab === 'users'" class="tab-pane">
           <div class="pane-header">
-            <h3>User Management</h3>
+            <h3>{{ t('admin.userManagement') }}</h3>
             <div class="header-actions">
               <button class="btn-primary" @click="showAddUserModal = true">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="12" y1="5" x2="12" y2="19"/>
                   <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                Add User
+                {{ t('admin.addUser') }}
               </button>
               <button class="btn-outline" @click="exportUsers">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -102,7 +102,7 @@
                   <polyline points="7 10 12 15 17 10"/>
                   <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                Export
+                {{ t('admin.export') }}
               </button>
             </div>
           </div>
@@ -110,12 +110,12 @@
           <div class="users-table">
             <div class="table-header">
               <div class="table-row">
-                <div class="table-cell">User</div>
-                <div class="table-cell">Role</div>
-                <div class="table-cell">Predictions</div>
-                <div class="table-cell">Last Active</div>
-                <div class="table-cell">Status</div>
-                <div class="table-cell actions">Actions</div>
+                <div class="table-cell">{{ t('admin.user') }}</div>
+                <div class="table-cell">{{ t('admin.role') }}</div>
+                <div class="table-cell">{{ t('admin.predictions') }}</div>
+                <div class="table-cell">{{ t('admin.lastActive') }}</div>
+                <div class="table-cell">{{ t('admin.status') }}</div>
+                <div class="table-cell actions">{{ t('admin.actions') }}</div>
               </div>
             </div>
             <div class="table-body">
@@ -177,7 +177,7 @@
         <!-- System Health -->
         <div v-if="activeTab === 'system'" class="tab-pane">
           <div class="pane-header">
-            <h3>System Health</h3>
+            <h3>{{ t('admin.systemHealth') }}</h3>
             <button class="btn-outline" @click="refreshSystemHealth">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="23 4 23 10 17 10"/>
@@ -190,65 +190,65 @@
 
           <div class="system-health-grid">
             <div class="health-card">
-              <h4>Server Status</h4>
+              <h4>{{ t('admin.serverStatus') }}</h4>
               <div class="health-status">
                 <div class="status-indicator online"></div>
-                <span>All Systems Operational</span>
+                <span>{{ t('admin.allSystemsOperational') }}</span>
               </div>
               <div class="health-metrics">
                 <div class="metric">
-                  <span>CPU Usage</span>
+                  <span>{{ t('admin.cpuUsage') }}</span>
                   <strong>{{ systemHealth.cpu }}%</strong>
                 </div>
                 <div class="metric">
-                  <span>Memory Usage</span>
+                  <span>{{ t('admin.memoryUsage') }}</span>
                   <strong>{{ systemHealth.memory }}%</strong>
                 </div>
                 <div class="metric">
-                  <span>Disk Usage</span>
+                  <span>{{ t('admin.diskUsage') }}</span>
                   <strong>{{ systemHealth.disk }}%</strong>
                 </div>
               </div>
             </div>
 
             <div class="health-card">
-              <h4>API Performance</h4>
+              <h4>{{ t('admin.apiPerformance') }}</h4>
               <div class="performance-metrics">
                 <div class="metric">
-                  <span>Response Time</span>
+                  <span>{{ t('admin.responseTime') }}</span>
                   <strong>{{ systemHealth.responseTime }}ms</strong>
                 </div>
                 <div class="metric">
-                  <span>Uptime</span>
+                  <span>{{ t('admin.uptime') }}</span>
                   <strong>{{ systemHealth.uptime }}</strong>
                 </div>
                 <div class="metric">
-                  <span>Error Rate</span>
+                  <span>{{ t('admin.errorRate') }}</span>
                   <strong>{{ systemHealth.errorRate }}%</strong>
                 </div>
               </div>
             </div>
 
             <div class="health-card">
-              <h4>Database Status</h4>
+              <h4>{{ t('admin.databaseStatus') }}</h4>
               <div class="database-stats">
                 <div class="stat">
-                  <span>Connections</span>
+                  <span>{{ t('admin.connections') }}</span>
                   <strong>{{ systemHealth.dbConnections }}</strong>
                 </div>
                 <div class="stat">
-                  <span>Query Time</span>
+                  <span>{{ t('admin.queryTime') }}</span>
                   <strong>{{ systemHealth.dbQueryTime }}ms</strong>
                 </div>
                 <div class="stat">
-                  <span>Size</span>
+                  <span>{{ t('admin.size') }}</span>
                   <strong>{{ systemHealth.dbSize }}MB</strong>
                 </div>
               </div>
             </div>
 
             <div class="health-card">
-              <h4>Recent Events</h4>
+              <h4>{{ t('admin.recentEvents') }}</h4>
               <div class="events-list">
                 <div 
                   v-for="event in systemEvents" 
@@ -276,9 +276,9 @@
         <!-- Model Management -->
         <div v-if="activeTab === 'models'" class="tab-pane">
           <div class="pane-header">
-            <h3>Model Management</h3>
+            <h3>{{ t('admin.modelManagement') }}</h3>
             <button class="btn-primary" @click="deployNewModel">
-              Deploy New Model
+              {{ t('admin.deployNewModel') }}
             </button>
           </div>
 
@@ -295,15 +295,15 @@
               
               <div class="model-stats">
                 <div class="stat">
-                  <span>Accuracy</span>
+                  <span>{{ t('admin.accuracy') }}</span>
                   <strong>{{ model.accuracy }}%</strong>
                 </div>
                 <div class="stat">
-                  <span>Predictions</span>
+                  <span>{{ t('admin.predictions') }}</span>
                   <strong>{{ model.predictions.toLocaleString() }}</strong>
                 </div>
                 <div class="stat">
-                  <span>Size</span>
+                  <span>{{ t('admin.size') }}</span>
                   <strong>{{ model.size }}MB</strong>
                 </div>
               </div>
@@ -314,144 +314,25 @@
                   :class="{ 'btn-secondary': model.status === 'active' }"
                   @click="toggleModelStatus(model)"
                 >
-                  {{ model.status === 'active' ? 'Active' : 'Activate' }}
+                  {{ model.status === 'active' ? t('admin.active') : t('admin.activate') }}
                 </button>
                 <button class="btn-outline" @click="retrainModel(model)">
-                  Retrain
+                  {{ t('admin.retrain') }}
                 </button>
                 <button class="btn-outline danger" @click="deleteModel(model)">
-                  Delete
+                  {{ t('admin.delete') }}
                 </button>
               </div>
 
               <div class="model-meta">
-                <span>Deployed: {{ formatTime(model.deployedAt) }}</span>
-                <span>Last Training: {{ formatTime(model.lastTrained) }}</span>
+                <span>{{ t('admin.deployed') }}: {{ formatTime(model.deployedAt) }}</span>
+                <span>{{ t('admin.lastTraining') }}: {{ formatTime(model.lastTrained) }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- System Settings -->
-        <div v-if="activeTab === 'settings'" class="tab-pane">
-          <div class="pane-header">
-            <h3>System Settings</h3>
-            <button class="btn-primary" @click="saveSettings">
-              Save Settings
-            </button>
-          </div>
 
-          <div class="settings-grid">
-            <div class="settings-section">
-              <h4>General Settings</h4>
-              <div class="setting-item">
-                <label>Application Name</label>
-                <input 
-                  v-model="settings.appName" 
-                  type="text" 
-                  class="form-input"
-                >
-              </div>
-              <div class="setting-item">
-                <label>Maximum File Size</label>
-                <input 
-                  v-model="settings.maxFileSize" 
-                  type="number" 
-                  class="form-input"
-                >
-                <span class="setting-hint">MB</span>
-              </div>
-              <div class="setting-item">
-                <label class="checkbox-container">
-                  <input type="checkbox" v-model="settings.allowRegistrations">
-                  <span class="checkmark"></span>
-                  Allow new user registrations
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-section">
-              <h4>Model Settings</h4>
-              <div class="setting-item">
-                <label>Default Confidence Threshold</label>
-                <input 
-                  v-model="settings.confidenceThreshold" 
-                  type="number" 
-                  min="0"
-                  max="100"
-                  class="form-input"
-                >
-                <span class="setting-hint">%</span>
-              </div>
-              <div class="setting-item">
-                <label>Auto-retrain Interval</label>
-                <select v-model="settings.retrainInterval" class="form-input">
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="never">Never</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="settings-section">
-              <h4>Security Settings</h4>
-              <div class="setting-item">
-                <label>Session Timeout</label>
-                <input 
-                  v-model="settings.sessionTimeout" 
-                  type="number" 
-                  class="form-input"
-                >
-                <span class="setting-hint">minutes</span>
-              </div>
-              <div class="setting-item">
-                <label>Max Login Attempts</label>
-                <input 
-                  v-model="settings.maxLoginAttempts" 
-                  type="number" 
-                  class="form-input"
-                >
-              </div>
-              <div class="setting-item">
-                <label class="checkbox-container">
-                  <input type="checkbox" v-model="settings.requireEmailVerification">
-                  <span class="checkmark"></span>
-                  Require email verification
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-section">
-              <h4>Backup & Maintenance</h4>
-              <div class="setting-item">
-                <label>Auto-backup Frequency</label>
-                <select v-model="settings.backupFrequency" class="form-input">
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </div>
-              <div class="setting-item">
-                <label>Retain Backups For</label>
-                <input 
-                  v-model="settings.retainBackups" 
-                  type="number" 
-                  class="form-input"
-                >
-                <span class="setting-hint">days</span>
-              </div>
-              <div class="setting-actions">
-                <button class="btn-outline" @click="createBackup">
-                  Create Backup Now
-                </button>
-                <button class="btn-outline" @click="runMaintenance">
-                  Run Maintenance
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -459,7 +340,7 @@
     <div v-if="showAddUserModal" class="modal-overlay" @click="showAddUserModal = false">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Add New User</h3>
+          <h3>{{ t('admin.addNewUser') }}</h3>
           <button class="modal-close" @click="showAddUserModal = false">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -468,8 +349,29 @@
           </button>
         </div>
         <div class="modal-body">
-          <!-- Add user form would go here -->
-          <p>User creation form would be implemented here.</p>
+          <div v-if="userFormError" class="error-message">{{ userFormError }}</div>
+          <form @submit.prevent="addNewUser">
+            <div class="form-group">
+              <label>{{ t('admin.username') }}</label>
+              <input v-model="newUser.username" type="text" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label>{{ t('admin.emailAddress') }}</label>
+              <input v-model="newUser.email" type="email" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label>{{ t('admin.newPassword') }}</label>
+              <input v-model="newUser.password" type="password" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label>{{ t('admin.confirmPassword') }}</label>
+              <input v-model="newUser.confirmPassword" type="password" class="form-input" required>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-outline" @click="showAddUserModal = false">{{ t('admin.cancel') }}</button>
+              <button type="submit" class="btn-primary">{{ t('admin.createUser') }}</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -477,129 +379,156 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/services/api'
+import { useI18n } from '@/i18n'
 
 export default {
   name: 'AdminPanel',
   setup() {
+    const router = useRouter()
+    const { t } = useI18n()
     const activeTab = ref('users')
     const showAddUserModal = ref(false)
-
-    const tabs = [
-      { id: 'users', name: 'Users' },
-      { id: 'system', name: 'System Health' },
-      { id: 'models', name: 'Models' },
-      { id: 'settings', name: 'Settings' }
-    ]
-
-    // Mock data
-    const stats = ref({
-      totalUsers: 142,
-      totalPredictions: 15420,
-      systemAccuracy: 98.3,
-      storageUsed: 12.4
+    const userFormError = ref('')
+    const newUser = ref({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
     })
-
-    const users = ref([
-      {
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        role: 'admin',
-        predictions: 2450,
-        lastActive: new Date(Date.now() - 3600000),
-        status: 'active'
-      },
-      {
-        id: 2,
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
-        role: 'user',
-        predictions: 1200,
-        lastActive: new Date(Date.now() - 86400000),
-        status: 'active'
-      },
-      {
-        id: 3,
-        name: 'Bob Johnson',
-        email: 'bob.johnson@example.com',
-        role: 'user',
-        predictions: 560,
-        lastActive: new Date(Date.now() - 259200000),
-        status: 'inactive'
-      }
+    
+    const tabs = computed(() => [
+      { id: 'users', name: t('admin.users') },
+      { id: 'system', name: t('admin.systemHealth') },
+      { id: 'models', name: t('admin.models') }
     ])
 
-    const systemHealth = ref({
-      cpu: 45,
-      memory: 68,
-      disk: 65,
-      responseTime: 45,
-      uptime: '99.9%',
-      errorRate: 0.2,
-      dbConnections: 24,
-      dbQueryTime: 12,
-      dbSize: 245
+    // Stats from localStorage
+    const stats = computed(() => {
+      const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions') || '[]')
+      const correct = predictions.filter(p => p.correct === true).length
+      const accuracy = predictions.length > 0 ? ((correct / predictions.length) * 100).toFixed(1) : 0
+      const storageSizeKB = new Blob([JSON.stringify(predictions)]).size / 1024
+      const storageMB = (storageSizeKB / 1024).toFixed(2)
+      
+      return {
+        totalUsers: 1,
+        totalPredictions: predictions.length,
+        systemAccuracy: parseFloat(accuracy),
+        storageUsed: parseFloat(storageMB)
+      }
     })
 
-    const systemEvents = ref([
-      {
-        id: 1,
+    const users = computed(() => {
+      const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions') || '[]')
+      const lastPrediction = predictions.length > 0 ? new Date(predictions[0].timestamp) : new Date()
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+      
+      return [
+        {
+          id: 1,
+          name: currentUser.username || 'Current User',
+          email: currentUser.email || 'user@digiscribe.com',
+          role: currentUser.role === 'ADMIN' ? 'admin' : 'user',
+          predictions: predictions.length,
+          lastActive: lastPrediction,
+          status: 'active'
+        }
+      ]
+    })
+
+    const systemHealth = computed(() => {
+      const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions') || '[]')
+      const errors = predictions.filter(p => p.correct === false).length
+      const errorRate = predictions.length > 0 ? ((errors / predictions.length) * 100).toFixed(1) : 0
+      const avgResponseTime = predictions.length > 0 
+        ? Math.round(predictions.reduce((sum, p) => sum + (p.processingTime || 50), 0) / predictions.length)
+        : 45
+      const storageMB = (new Blob([JSON.stringify(predictions)]).size / 1024 / 1024).toFixed(1)
+      
+      return {
+        cpu: 35,
+        memory: 52,
+        disk: Math.min(Math.round((parseFloat(storageMB) / 100) * 100), 100),
+        responseTime: avgResponseTime,
+        uptime: '99.9%',
+        errorRate: parseFloat(errorRate),
+        dbConnections: 1,
+        dbQueryTime: 8,
+        dbSize: parseFloat(storageMB)
+      }
+    })
+
+    const systemEvents = computed(() => {
+      const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions') || '[]')
+      const events = []
+      
+      if (predictions.length > 0) {
+        events.push({
+          id: 1,
+          type: 'success',
+          message: `Latest prediction completed successfully`,
+          timestamp: new Date(predictions[0].timestamp)
+        })
+      }
+      
+      const errors = predictions.filter(p => p.correct === false)
+      if (errors.length > 0) {
+        events.push({
+          id: 2,
+          type: 'warning',
+          message: `${errors.length} prediction errors detected`,
+          timestamp: new Date(errors[0].timestamp)
+        })
+      }
+      
+      events.push({
+        id: 3,
         type: 'info',
-        message: 'System backup completed successfully',
-        timestamp: new Date(Date.now() - 3600000)
-      },
-      {
-        id: 2,
-        type: 'warning',
-        message: 'High memory usage detected',
-        timestamp: new Date(Date.now() - 7200000)
-      },
-      {
-        id: 3,
-        type: 'success',
-        message: 'New model deployed successfully',
-        timestamp: new Date(Date.now() - 86400000)
-      }
-    ])
-
-    const adminModels = ref([
-      {
-        id: 1,
-        name: 'CNN Basic',
-        version: '1.2',
-        accuracy: 98.2,
-        predictions: 15420,
-        size: 45,
-        status: 'active',
-        deployedAt: new Date(Date.now() - 86400000),
-        lastTrained: new Date(Date.now() - 172800000)
-      },
-      {
-        id: 2,
-        name: 'ResNet Enhanced',
-        version: '2.1',
-        accuracy: 99.1,
-        predictions: 8920,
-        size: 120,
-        status: 'idle',
-        deployedAt: new Date(Date.now() - 172800000),
-        lastTrained: new Date(Date.now() - 259200000)
-      }
-    ])
-
-    const settings = ref({
-      appName: 'DigiScrib',
-      maxFileSize: 10,
-      allowRegistrations: true,
-      confidenceThreshold: 80,
-      retrainInterval: 'weekly',
-      sessionTimeout: 30,
-      maxLoginAttempts: 5,
-      requireEmailVerification: true,
-      backupFrequency: 'weekly',
-      retainBackups: 30
+        message: 'System running normally',
+        timestamp: new Date()
+      })
+      
+      return events
     })
+
+    const adminModels = ref([])
+    
+    const loadModels = async () => {
+      try {
+        const response = await api.get('/models')
+        const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions') || '[]')
+        
+        adminModels.value = response.data.map(model => ({
+          ...model,
+          predictions: model.status === 'active' ? predictions.length : model.prediction_count || 0,
+          deployedAt: model.created_at || new Date(Date.now() - 86400000),
+          lastTrained: model.last_trained || new Date(Date.now() - 172800000)
+        }))
+      } catch (error) {
+        const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions') || '[]')
+        const correct = predictions.filter(p => p.correct === true).length
+        const accuracy = predictions.length > 0 ? ((correct / predictions.length) * 100).toFixed(1) : 0
+        
+        adminModels.value = [
+          {
+            id: 1,
+            name: 'CNN Basic',
+            version: '1.0',
+            accuracy: parseFloat(accuracy),
+            predictions: predictions.length,
+            size: 45,
+            status: 'active',
+            deployedAt: new Date(Date.now() - 86400000),
+            lastTrained: new Date(Date.now() - 172800000)
+          }
+        ]
+      }
+    }
+
+
 
     // Methods
     const getUserInitials = (name) => {
@@ -652,28 +581,57 @@ export default {
     }
 
     const deployNewModel = () => {
-      console.log('Deploying new model')
+      router.push('/dashboard/models')
+    }
+    
+    const addNewUser = () => {
+      userFormError.value = ''
+      
+      if (newUser.value.password !== newUser.value.confirmPassword) {
+        userFormError.value = 'Passwords do not match'
+        return
+      }
+      
+      if (newUser.value.password.length < 6) {
+        userFormError.value = 'Password must be at least 6 characters'
+        return
+      }
+      
+      const users = JSON.parse(localStorage.getItem('system_users') || '[]')
+      
+      if (users.find(u => u.username === newUser.value.username)) {
+        userFormError.value = 'Username already exists'
+        return
+      }
+      
+      users.push({
+        username: newUser.value.username,
+        email: newUser.value.email,
+        password: newUser.value.password,
+        createdAt: new Date().toISOString()
+      })
+      
+      localStorage.setItem('system_users', JSON.stringify(users))
+      
+      newUser.value = {
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      }
+      
+      showAddUserModal.value = false
+      alert('User created successfully!')
     }
 
-    const saveSettings = () => {
-      console.log('Saving settings:', settings.value)
-      alert('Settings saved successfully!')
-    }
 
-    const createBackup = () => {
-      console.log('Creating backup')
-    }
-
-    const runMaintenance = () => {
-      console.log('Running maintenance')
-    }
 
     onMounted(() => {
-      // In a real app, this would fetch admin data
-      console.log('Loading admin panel data')
+      loadModels()
     })
 
     return {
+      t,
       activeTab,
       tabs,
       stats,
@@ -681,8 +639,10 @@ export default {
       systemHealth,
       systemEvents,
       adminModels,
-      settings,
       showAddUserModal,
+      userFormError,
+      newUser,
+      addNewUser,
       getUserInitials,
       formatTime,
       editUser,
@@ -692,10 +652,7 @@ export default {
       toggleModelStatus,
       retrainModel,
       deleteModel,
-      deployNewModel,
-      saveSettings,
-      createBackup,
-      runMaintenance
+      deployNewModel
     }
   }
 }
@@ -713,12 +670,12 @@ export default {
 .page-header h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
@@ -731,10 +688,11 @@ export default {
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -776,13 +734,13 @@ export default {
 .stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -801,16 +759,16 @@ export default {
 
 /* Admin Tabs */
 .admin-tabs {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
 .tabs-header {
   display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
+  background: var(--tab-bg);
 }
 
 .tab-btn {
@@ -819,29 +777,31 @@ export default {
   border: none;
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: 2px solid transparent;
 }
 
 .tab-btn:hover {
-  color: #374151;
-  background: #f1f5f9;
+  color: var(--text-primary);
+  background: var(--background);
 }
 
 .tab-btn.active {
-  color: #059669;
-  border-bottom-color: #059669;
-  background: white;
+  color: var(--success);
+  border-bottom-color: var(--tab-active-border);
+  background: var(--tab-active-bg);
 }
 
 .tab-content {
   padding: 0;
+  background: var(--tab-bg);
 }
 
 .tab-pane {
   padding: 0;
+  background: var(--tab-bg);
 }
 
 /* Pane Header */
@@ -850,13 +810,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .pane-header h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -920,8 +880,8 @@ export default {
 }
 
 .table-header {
-  background: #f8fafc;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
 }
 
 .table-row {
@@ -932,9 +892,14 @@ export default {
   align-items: center;
 }
 
+.table-body .table-row {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
 .table-cell {
   font-size: 14px;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .table-cell.actions {
@@ -962,12 +927,12 @@ export default {
 
 .user-details .user-name {
   font-weight: 500;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .user-details .user-email {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .role-badge {
@@ -1046,15 +1011,16 @@ export default {
 }
 
 .health-card {
-  background: #f8fafc;
+  background: var(--surface);
   border-radius: 8px;
   padding: 20px;
+  border: 1px solid var(--border);
 }
 
 .health-card h4 {
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 16px;
 }
 
@@ -1086,7 +1052,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .metric:last-child, .stat:last-child {
@@ -1094,12 +1060,12 @@ export default {
 }
 
 .metric span, .stat span {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .metric strong, .stat strong {
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -1117,8 +1083,8 @@ export default {
   gap: 12px;
   padding: 12px;
   border-radius: 6px;
-  background: white;
-  border-left: 4px solid #e5e7eb;
+  background: var(--surface);
+  border-left: 4px solid var(--border);
 }
 
 .event-item.info {
@@ -1144,13 +1110,13 @@ export default {
 
 .event-message {
   font-size: 14px;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .event-time {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 /* Model Management */
@@ -1162,14 +1128,14 @@ export default {
 }
 
 .model-admin-card {
-  background: #f8fafc;
+  background: var(--surface);
   border-radius: 8px;
   padding: 20px;
-  border: 2px solid transparent;
+  border: 2px solid var(--border);
 }
 
 .model-admin-card:hover {
-  border-color: #059669;
+  border-color: var(--success);
 }
 
 .model-header {
@@ -1182,14 +1148,14 @@ export default {
 .model-header h4 {
   font-size: 16px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .model-version {
   font-size: 12px;
-  color: #64748b;
-  background: white;
+  color: var(--text-secondary);
+  background: var(--background);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -1239,107 +1205,7 @@ export default {
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  color: #64748b;
-}
-
-/* Settings */
-.settings-grid {
-  padding: 24px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 32px;
-}
-
-.settings-section {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.settings-section h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.setting-item {
-  margin-bottom: 16px;
-}
-
-.setting-item label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 6px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #059669;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-}
-
-.setting-hint {
-  font-size: 12px;
-  color: #64748b;
-  margin-left: 8px;
-}
-
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.checkbox-container input {
-  display: none;
-}
-
-.checkmark {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #d1d5db;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.checkbox-container input:checked + .checkmark {
-  background: #059669;
-  border-color: #059669;
-}
-
-.checkbox-container input:checked + .checkmark::after {
-  content: '';
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  margin-top: -1px;
-}
-
-.setting-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
+  color: var(--text-secondary);
 }
 
 /* Modal */
@@ -1357,13 +1223,14 @@ export default {
 }
 
 .modal-content {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
 }
 
 .modal-header {
@@ -1378,7 +1245,7 @@ export default {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .modal-close {
@@ -1386,16 +1253,62 @@ export default {
   border: none;
   padding: 4px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--text-secondary);
   border-radius: 4px;
 }
 
 .modal-close:hover {
-  background: #f1f5f9;
+  background: var(--background);
 }
 
 .modal-body {
   padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.error-message {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  font-size: 13px;
 }
 
 /* Responsive */
@@ -1419,8 +1332,7 @@ export default {
   }
   
   .system-health-grid,
-  .models-grid,
-  .settings-grid {
+  .models-grid {
     grid-template-columns: 1fr;
   }
   

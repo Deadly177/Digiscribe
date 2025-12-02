@@ -17,9 +17,11 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Sidebar from '../components/layout/Sidebar.vue'
 import TopNavigation from '../components/layout/TopNavigation.vue'
+
+const THEME_KEY = 'digiscribe_theme'
 
 export default {
   name: 'Dashboard1',
@@ -29,6 +31,11 @@ export default {
   },
   setup() {
     const sidebarCollapsed = ref(false)
+
+    onMounted(() => {
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'light'
+      document.documentElement.setAttribute('data-theme', savedTheme)
+    })
 
     return {
       sidebarCollapsed
@@ -41,7 +48,7 @@ export default {
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--background);
 }
 
 .main-content {
@@ -61,6 +68,7 @@ export default {
   min-height: calc(100vh - 70px);
   width: 100%;
   max-width: none;
+  background: var(--background);
 }
 
 /* Responsive */

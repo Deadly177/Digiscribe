@@ -65,14 +65,7 @@
           <span class="nav-text">{{ t('sidebar.analytics') }}</span>
         </router-link>
         
-        <router-link to="/dashboard/feedback" class="nav-item">
-          <div class="nav-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-            </svg>
-          </div>
-          <span class="nav-text">{{ t('sidebar.feedback') }}</span>
-        </router-link>
+
       </div>
       
       <div class="nav-section">
@@ -90,26 +83,29 @@
     </nav>
     
     <div class="sidebar-footer">
-      <LanguageSwitcher :compact="true" />
+      <button class="lang-toggle-btn" @click="toggleLanguage" :title="isCollapsed ? (locale === 'en' ? 'Switch to Chinese' : 'Switch to English') : ''">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" :class="{ 'flipped': locale === 'zh' }">
+          <path d="M7 16V4M7 4L3 8M7 4L11 8"/>
+          <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+        <span v-if="!isCollapsed">{{ locale === 'en' ? 'EN' : 'ZH' }}</span>
+      </button>
       <button class="collapse-btn" @click="$emit('toggle')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6" v-if="!isCollapsed"/>
           <polyline points="9 18 15 12 9 6" v-else/>
         </svg>
-        <span v-if="!isCollapsed">{{ locale === 'zh' ? '收起' : 'Collapse' }}</span>
+        <span v-if="!isCollapsed">Collapse</span>
       </button>
     </div>
   </aside>
 </template>
 
 <script>
-import { computed } from 'vue'
 import { useI18n } from '@/i18n'
-import LanguageSwitcher from '../common/LanguageSwitcher.vue'
 
 export default {
   name: 'Sidebar',
-  components: { LanguageSwitcher },
   props: {
     isCollapsed: {
       type: Boolean,
@@ -117,10 +113,16 @@ export default {
     }
   },
   setup() {
-    const { t, locale } = useI18n()
+    const { t, locale, setLocale } = useI18n()
+    
+    const toggleLanguage = () => {
+      setLocale(locale.value === 'en' ? 'zh' : 'en')
+    }
+    
     return {
       t,
-      locale: computed(() => locale.value)
+      locale,
+      toggleLanguage
     }
   },
   emits: ['toggle']
@@ -130,8 +132,8 @@ export default {
 <style scoped>
 .sidebar {
   width: 280px;
-  background: white;
-  border-right: 1px solid #e2e8f0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -146,7 +148,7 @@ export default {
 
 .sidebar-header {
   padding: 24px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .logo {
@@ -161,13 +163,13 @@ export default {
 }
 
 .logo h2 {
-  color: #0f172a;
+  color: var(--text-primary);
   font-weight: 700;
   margin: 0;
 }
 
 .logo p {
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 13px;
   margin: 2px 0 0;
 }
@@ -175,7 +177,7 @@ export default {
 .logo-collapsed {
   width: 40px;
   height: 40px;
-  background: #f1f5f9;
+  background: var(--background);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -191,7 +193,7 @@ export default {
 /* Dashboard Return Button Styles */
 .dashboard-return-section {
   padding: 16px 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .dashboard-return-btn {
@@ -199,28 +201,29 @@ export default {
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
-  color: #059669;
+  color: var(--success);
   text-decoration: none;
   transition: all 0.2s ease;
-  background: #f0fdf4;
+  background: var(--primary-light);
   margin: 0 16px;
   border-radius: 8px;
-  border: 1px solid #d1fae5;
+  border: 1px solid var(--success);
 }
 
 .dashboard-return-btn:hover {
-  background: #dcfce7;
+  background: var(--success);
+  color: white;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
 }
 
 .dashboard-return-btn .nav-icon {
-  color: #059669;
+  color: inherit;
 }
 
 .dashboard-return-btn .nav-text {
   font-weight: 600;
-  color: #059669;
+  color: inherit;
 }
 
 .sidebar.collapsed .dashboard-return-btn {
@@ -247,7 +250,7 @@ export default {
   padding: 8px 24px;
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -257,21 +260,21 @@ export default {
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
-  color: #64748b;
+  color: var(--text-secondary);
   text-decoration: none;
   transition: all 0.2s ease;
   border-right: 3px solid transparent;
 }
 
 .nav-item:hover {
-  background: #f8fafc;
-  color: #334155;
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .nav-item.router-link-active {
-  background: #f0fdf4;
-  color: #059669;
-  border-right-color: #059669;
+  background: var(--primary-light);
+  color: var(--success);
+  border-right-color: var(--success);
 }
 
 .nav-icon {
@@ -302,10 +305,47 @@ export default {
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.lang-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lang-toggle-btn:hover {
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+.lang-toggle-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.lang-toggle-btn svg.flipped {
+  transform: rotate(180deg);
+}
+
+.sidebar.collapsed .lang-toggle-btn {
+  justify-content: center;
+}
+
+.sidebar.collapsed .lang-toggle-btn span {
+  display: none;
 }
 
 .collapse-btn {
@@ -317,14 +357,15 @@ export default {
   border: none;
   padding: 8px;
   border-radius: 6px;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 14px;
 }
 
 .collapse-btn:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .sidebar.collapsed .collapse-btn {

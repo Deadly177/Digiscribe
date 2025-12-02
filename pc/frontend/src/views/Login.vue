@@ -137,11 +137,7 @@
             </button>
           </form>
 
-          <div class="auth-footer">
-            <p>{{ t('login.noAccount') }} 
-              <a @click="$router.push('/register')" class="auth-link">{{ t('login.signUp') }}</a>
-            </p>
-          </div>
+
         </div>
       </div>
     </div>
@@ -179,12 +175,36 @@ export default {
       errorMessage.value = ''
       
       try {
-        await authService.login({
-          username: form.value.username,
-          password: form.value.password
-        })
+        // Check for default admin credentials
+        if (form.value.username === 'admin' && form.value.password === 'admin123') {
+          const adminUser = {
+            username: 'admin',
+            email: 'admin@digiscribe.com',
+            role: 'ADMIN'
+          }
+          localStorage.setItem('authToken', 'admin-token')
+          localStorage.setItem('user', JSON.stringify(adminUser))
+          router.push({ name: 'Home' })
+          return
+        }
         
-        router.push({ name: 'Home' })
+        // Check for users created through admin panel
+        const users = JSON.parse(localStorage.getItem('system_users') || '[]')
+        const user = users.find(u => u.username === form.value.username && u.password === form.value.password)
+        
+        if (user) {
+          const userData = {
+            username: user.username,
+            email: user.email,
+            role: 'USER'
+          }
+          localStorage.setItem('authToken', 'user-token')
+          localStorage.setItem('user', JSON.stringify(userData))
+          router.push({ name: 'Home' })
+          return
+        }
+        
+        errorMessage.value = 'Invalid username or password'
       } catch (error) {
         errorMessage.value = error.message
       } finally {

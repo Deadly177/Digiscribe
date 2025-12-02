@@ -259,8 +259,8 @@ export default {
 <style scoped>
 .top-navigation {
   height: 70px;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -291,14 +291,14 @@ export default {
   display: block;
   font-size: 12px;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--text-secondary);
   letter-spacing: 0.1em;
 }
 
 .page-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .sidebar-toggle {
@@ -307,13 +307,13 @@ export default {
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
 .sidebar-toggle:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .nav-right {
@@ -323,7 +323,7 @@ export default {
 }
 
 .nav-language {
-  background: #f1f5f9;
+  background: var(--background);
   border-radius: 999px;
 }
 
@@ -337,13 +337,13 @@ export default {
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
-  color: #64748b;
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
 .icon-button:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .notification-badge {
@@ -363,8 +363,8 @@ export default {
   top: 45px;
   right: 0;
   width: 280px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15);
   padding: 12px;
@@ -397,7 +397,7 @@ export default {
 .notification-item {
   padding: 8px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--background);
 }
 
 .notification-item.read {
@@ -407,28 +407,28 @@ export default {
 .notification-item p {
   margin: 0 0 4px;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .notification-item small {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .notification-footer {
   width: 100%;
   border: none;
-  background: #f1f5f9;
+  background: var(--background);
   border-radius: 8px;
   padding: 6px 0;
   margin-top: 10px;
   cursor: pointer;
-  color: #2563eb;
+  color: var(--primary-dark);
   font-weight: 600;
 }
 
 .empty-state {
   padding: 16px 8px;
-  color: #94a3b8;
+  color: var(--text-secondary);
   text-align: center;
 }
 
@@ -441,18 +441,18 @@ export default {
   align-items: center;
   gap: 10px;
   background: none;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   padding: 6px 12px;
   border-radius: 999px;
   cursor: pointer;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .user-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #0f172a;
+  background: var(--success);
   color: white;
   display: flex;
   align-items: center;
@@ -469,7 +469,7 @@ export default {
 .user-name {
   font-size: 14px;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .user-dropdown {
@@ -477,8 +477,8 @@ export default {
   top: 50px;
   right: 0;
   width: 220px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15);
   padding: 12px;
@@ -496,13 +496,13 @@ export default {
 }
 
 .user-email {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
 .dropdown-divider {
   height: 1px;
-  background: #e2e8f0;
+  background: var(--border);
   margin: 12px 0;
 }
 
@@ -514,12 +514,12 @@ export default {
   align-items: center;
   gap: 10px;
   padding: 8px 0;
-  color: #0f172a;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
 .dropdown-item svg {
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .dropdown-item.text-danger {

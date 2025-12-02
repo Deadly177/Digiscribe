@@ -1,17 +1,17 @@
 <template>
   <div class="settings-page">
     <div class="page-header">
-      <h1>Settings</h1>
-      <p>Customize your DigiScribe experience.</p>
+      <h1>{{ t('settings.title') }}</h1>
+      <p>{{ t('settings.subtitle') }}</p>
     </div>
 
     <div class="settings-grid">
       <div class="card">
-        <h2>Appearance</h2>
+        <h2>{{ t('settings.appearance') }}</h2>
         <div class="setting-row">
           <div>
-            <div class="label">Dark mode</div>
-            <div class="hint">Toggle the app theme between light and dark.</div>
+            <div class="label">{{ t('settings.darkMode') }}</div>
+            <div class="hint">{{ t('settings.darkModeHint') }}</div>
           </div>
           <label class="switch">
             <input type="checkbox" v-model="darkMode" @change="applyTheme">
@@ -21,11 +21,11 @@
       </div>
 
       <div class="card">
-        <h2>Notifications</h2>
+        <h2>{{ t('settings.notifications') }}</h2>
         <div class="setting-row">
           <div>
-            <div class="label">Email alerts</div>
-            <div class="hint">Receive updates when models finish training.</div>
+            <div class="label">{{ t('settings.emailAlerts') }}</div>
+            <div class="hint">{{ t('settings.emailAlertsHint') }}</div>
           </div>
           <label class="switch">
             <input type="checkbox" v-model="emailAlerts">
@@ -34,8 +34,8 @@
         </div>
         <div class="setting-row">
           <div>
-            <div class="label">Push notifications</div>
-            <div class="hint">Show in-app notifications for new activity.</div>
+            <div class="label">{{ t('settings.pushNotifications') }}</div>
+            <div class="hint">{{ t('settings.pushNotificationsHint') }}</div>
           </div>
           <label class="switch">
             <input type="checkbox" v-model="pushAlerts">
@@ -49,12 +49,14 @@
 
 <script>
 import { ref, onMounted } from 'vue'
+import { useI18n } from '@/i18n'
 
 const THEME_KEY = 'digiscribe_theme'
 
 export default {
   name: 'Settings',
   setup() {
+    const { t } = useI18n()
     const darkMode = ref(false)
     const emailAlerts = ref(true)
     const pushAlerts = ref(true)
@@ -69,11 +71,11 @@ export default {
       const saved = localStorage.getItem(THEME_KEY)
       if (saved === 'dark') {
         darkMode.value = true
-        applyTheme()
       }
+      applyTheme()
     })
 
-    return { darkMode, emailAlerts, pushAlerts, applyTheme }
+    return { t, darkMode, emailAlerts, pushAlerts, applyTheme }
   }
 }
 </script>
@@ -91,7 +93,7 @@ export default {
 }
 .page-header p {
   margin: 4px 0 0;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 .settings-grid {
   display: grid;
@@ -114,7 +116,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid #1f2937;
+  border-bottom: 1px solid var(--border);
 }
 .setting-row:last-child {
   border-bottom: none;
@@ -123,7 +125,7 @@ export default {
   font-weight: 600;
 }
 .hint {
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 .switch {
@@ -144,7 +146,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #4b5563;
+  background-color: var(--border);
   transition: 0.2s;
   border-radius: 24px;
 }
@@ -160,7 +162,7 @@ export default {
   border-radius: 50%;
 }
 input:checked + .slider {
-  background-color: #22c55e;
+  background-color: var(--success);
 }
 input:checked + .slider:before {
   transform: translateX(22px);

@@ -1,46 +1,17 @@
 <template>
   <div class="analytics">
     <div class="page-header">
-      <h1>Analytics Dashboard</h1>
-      <p>Comprehensive insights into your digit recognition performance</p>
+      <h1>{{ t('analytics.title') }}</h1>
+      <p>{{ t('analytics.subtitle') }}</p>
     </div>
 
-    <!-- Date Range Filter -->
-    <div class="filters">
-      <div class="filter-group">
-        <label>Date Range</label>
-        <select v-model="selectedRange" @change="updateAnalytics" class="filter-select">
-          <option value="7d">Last 7 Days</option>
-          <option value="30d">Last 30 Days</option>
-          <option value="90d">Last 90 Days</option>
-          <option value="1y">Last Year</option>
-          <option value="all">All Time</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>Model</label>
-        <select v-model="selectedModel" @change="updateAnalytics" class="filter-select">
-          <option value="all">All Models</option>
-          <option v-for="model in models" :key="model.id" :value="model.id">
-            {{ model.name }}
-          </option>
-        </select>
-      </div>
-      <button class="export-btn" @click="exportData">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Export Data
-      </button>
-    </div>
+
 
     <!-- Key Metrics -->
     <div class="metrics-overview">
       <div class="metric-card large">
         <div class="metric-value">{{ totalPredictions.toLocaleString() }}</div>
-        <div class="metric-label">Total Predictions</div>
+        <div class="metric-label">{{ t('analytics.totalPredictions') }}</div>
         <div class="metric-change positive">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
@@ -52,7 +23,7 @@
 
       <div class="metric-card large">
         <div class="metric-value">{{ overallAccuracy }}%</div>
-        <div class="metric-label">Overall Accuracy</div>
+        <div class="metric-label">{{ t('analytics.overallAccuracy') }}</div>
         <div class="metric-change positive">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
@@ -64,7 +35,7 @@
 
       <div class="metric-card large">
         <div class="metric-value">{{ averageConfidence }}%</div>
-        <div class="metric-label">Average Confidence</div>
+        <div class="metric-label">{{ t('analytics.averageConfidence') }}</div>
         <div class="metric-change neutral">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -75,7 +46,7 @@
 
       <div class="metric-card large">
         <div class="metric-value">{{ userSatisfaction }}%</div>
-        <div class="metric-label">User Satisfaction</div>
+        <div class="metric-label">{{ t('analytics.userSatisfaction') }}</div>
         <div class="metric-change positive">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
@@ -91,36 +62,21 @@
       <!-- Predictions Over Time -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Predictions Over Time</h3>
-          <div class="chart-legend">
-            <div class="legend-item">
-              <div class="legend-color success"></div>
-              <span>Successful</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color failed"></div>
-              <span>Failed</span>
-            </div>
-          </div>
+          <h3>{{ t('analytics.weeklyPrediction') }}</h3>
         </div>
         <div class="chart-container">
           <div class="bar-chart">
-            <div 
-              v-for="day in predictionsOverTime" 
+            <div
+              v-for="day in predictionsOverTime"
               :key="day.date"
               class="bar-group"
             >
               <div class="bar-label">{{ day.date }}</div>
               <div class="bars">
-                <div 
-                  class="bar success" 
-                  :style="{ height: `${(day.successful / maxPredictions) * 100}%` }"
-                  :title="`Successful: ${day.successful}`"
-                ></div>
-                <div 
-                  class="bar failed" 
-                  :style="{ height: `${(day.failed / maxPredictions) * 100}%` }"
-                  :title="`Failed: ${day.failed}`"
+                <div
+                  class="bar total"
+                  :style="{ height: maxPredictions > 0 ? `${(day.total / maxPredictions) * 100}%` : '2%' }"
+                  :title="`Total: ${day.total}`"
                 ></div>
               </div>
               <div class="bar-total">{{ day.total }}</div>
@@ -129,54 +85,30 @@
         </div>
       </div>
 
-      <!-- Accuracy by Digit -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3>Accuracy by Digit</h3>
-        </div>
-        <div class="chart-container">
-          <div class="accuracy-chart">
-            <div 
-              v-for="digit in digitAccuracy" 
-              :key="digit.digit"
-              class="accuracy-item"
-            >
-              <div class="digit">{{ digit.digit }}</div>
-              <div class="accuracy-bar-container">
-                <div 
-                  class="accuracy-bar" 
-                  :style="{ width: `${digit.accuracy}%` }"
-                  :class="getAccuracyClass(digit.accuracy)"
-                ></div>
-                <div class="accuracy-value">{{ digit.accuracy }}%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <!-- Model Performance Comparison -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Model Performance</h3>
+          <h3>{{ t('analytics.modelPerformance') }}</h3>
         </div>
         <div class="chart-container">
           <div class="model-comparison">
-            <div 
-              v-for="model in modelPerformance" 
+            <div
+              v-for="model in modelPerformance"
               :key="model.id"
               class="model-bar"
             >
               <div class="model-name">{{ model.name }}</div>
               <div class="performance-bar-container">
-                <div 
-                  class="performance-bar" 
+                <div
+                  class="performance-bar"
                   :style="{ width: `${model.accuracy}%` }"
                 ></div>
                 <div class="performance-value">{{ model.accuracy }}%</div>
               </div>
               <div class="model-stats">
-                <span>{{ model.predictions }} predictions</span>
+                <span>{{ model.predictions }} {{ t('analytics.predictions') }}</span>
               </div>
             </div>
           </div>
@@ -186,20 +118,20 @@
       <!-- Confidence Distribution -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Confidence Distribution</h3>
+          <h3>{{ t('analytics.confidenceDistribution') }}</h3>
         </div>
         <div class="chart-container">
           <div class="confidence-distribution">
-            <div 
-              v-for="bucket in confidenceDistribution" 
+            <div
+              v-for="bucket in confidenceDistribution"
               :key="bucket.range"
               class="confidence-bucket"
             >
               <div class="bucket-range">{{ bucket.range }}%</div>
               <div class="bucket-bar-container">
-                <div 
-                  class="bucket-bar" 
-                  :style="{ width: `${(bucket.count / maxConfidenceCount) * 100}%` }"
+                <div
+                  class="bucket-bar"
+                  :style="{ width: `${maxConfidenceCount > 0 ? (bucket.count / maxConfidenceCount) * 100 : 0}%` }"
                 ></div>
                 <div class="bucket-count">{{ bucket.count }}</div>
               </div>
@@ -211,20 +143,20 @@
       <!-- Peak Usage Hours -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Peak Usage Hours</h3>
+          <h3>{{ t('analytics.peakUsageHours') }}</h3>
         </div>
         <div class="chart-container">
           <div class="usage-chart">
-            <div 
-              v-for="hour in usageByHour" 
+            <div
+              v-for="hour in usageByHour"
               :key="hour.hour"
               class="usage-hour"
             >
               <div class="hour-label">{{ hour.hour }}</div>
               <div class="usage-bar-container">
-                <div 
-                  class="usage-bar" 
-                  :style="{ height: `${(hour.predictions / maxUsage) * 100}%` }"
+                <div
+                  class="usage-bar"
+                  :style="{ height: `${maxUsage > 0 ? (hour.predictions / maxUsage) * 100 : 0}%` }"
                 ></div>
               </div>
               <div class="usage-count">{{ hour.predictions }}</div>
@@ -233,106 +165,7 @@
         </div>
       </div>
 
-      <!-- Feedback Sentiment -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3>Feedback Sentiment</h3>
-        </div>
-        <div class="chart-container">
-          <div class="sentiment-chart">
-            <div class="sentiment-donut">
-              <div class="donut-segment correct" :style="{ transform: `rotate(${correctFeedbackAngle}deg)` }"></div>
-              <div class="donut-segment incorrect" :style="{ transform: `rotate(${incorrectFeedbackAngle}deg)` }"></div>
-              <div class="donut-center">
-                <div class="donut-value">{{ feedbackStats.correctPercentage }}%</div>
-                <div class="donut-label">Correct</div>
-              </div>
-            </div>
-            <div class="sentiment-legend">
-              <div class="sentiment-item">
-                <div class="sentiment-color correct"></div>
-                <span>Correct Predictions</span>
-                <strong>{{ feedbackStats.correct }}</strong>
-              </div>
-              <div class="sentiment-item">
-                <div class="sentiment-color incorrect"></div>
-                <span>Incorrect Predictions</span>
-                <strong>{{ feedbackStats.incorrect }}</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Detailed Statistics -->
-    <div class="detailed-stats">
-      <h2>Detailed Statistics</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h4>Response Times</h4>
-          <div class="stat-item">
-            <span>Average</span>
-            <strong>{{ responseTimes.average }}ms</strong>
-          </div>
-          <div class="stat-item">
-            <span>P95</span>
-            <strong>{{ responseTimes.p95 }}ms</strong>
-          </div>
-          <div class="stat-item">
-            <span>P99</span>
-            <strong>{{ responseTimes.p99 }}ms</strong>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <h4>Error Analysis</h4>
-          <div class="stat-item">
-            <span>Total Errors</span>
-            <strong>{{ errorAnalysis.total }}</strong>
-          </div>
-          <div class="stat-item">
-            <span>Model Errors</span>
-            <strong>{{ errorAnalysis.model }}</strong>
-          </div>
-          <div class="stat-item">
-            <span>System Errors</span>
-            <strong>{{ errorAnalysis.system }}</strong>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <h4>User Engagement</h4>
-          <div class="stat-item">
-            <span>Active Users</span>
-            <strong>{{ userEngagement.active }}</strong>
-          </div>
-          <div class="stat-item">
-            <span>Avg Session</span>
-            <strong>{{ userEngagement.avgSession }}m</strong>
-          </div>
-          <div class="stat-item">
-            <span>Return Rate</span>
-            <strong>{{ userEngagement.returnRate }}%</strong>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <h4>Model Usage</h4>
-          <div class="stat-item">
-            <span>Most Used</span>
-            <strong>{{ modelUsage.mostUsed }}</strong>
-          </div>
-          <div class="stat-item">
-            <span>Avg Accuracy</span>
-            <strong>{{ modelUsage.avgAccuracy }}%</strong>
-          </div>
-          <div class="stat-item">
-            <span>Training Time</span>
-            <strong>{{ modelUsage.avgTrainingTime }}m</strong>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -340,62 +173,147 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
+import { useI18n } from '@/i18n'
 
 export default {
   name: 'Analytics',
   setup() {
+    const { t } = useI18n()
     const selectedRange = ref('30d')
     const selectedModel = ref('all')
 
-    // Mock data
-    const predictionsOverTime = ref([
-      { date: 'Mon', successful: 45, failed: 3, total: 48 },
-      { date: 'Tue', successful: 52, failed: 2, total: 54 },
-      { date: 'Wed', successful: 38, failed: 5, total: 43 },
-      { date: 'Thu', successful: 61, failed: 4, total: 65 },
-      { date: 'Fri', successful: 49, failed: 2, total: 51 },
-      { date: 'Sat', successful: 35, failed: 3, total: 38 },
-      { date: 'Sun', successful: 28, failed: 1, total: 29 }
-    ])
+    const predictionsOverTime = ref([])
 
-    const digitAccuracy = ref([
-      { digit: '0', accuracy: 99.2 },
-      { digit: '1', accuracy: 99.8 },
-      { digit: '2', accuracy: 98.5 },
-      { digit: '3', accuracy: 97.9 },
-      { digit: '4', accuracy: 98.7 },
-      { digit: '5', accuracy: 96.8 },
-      { digit: '6', accuracy: 99.1 },
-      { digit: '7', accuracy: 98.3 },
-      { digit: '8', accuracy: 97.5 },
-      { digit: '9', accuracy: 98.9 }
-    ])
+    const buildPredictionsOverTime = () => {
+      try {
+        const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
+        
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        const last7Days = []
+        const now = new Date()
+        
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date(now)
+          date.setDate(date.getDate() - i)
+          const dayName = days[date.getDay()]
+          
+          const dayPredictions = predictions.filter(p => {
+            const pDate = new Date(p.timestamp)
+            return pDate.toDateString() === date.toDateString()
+          })
+          
+          const successful = dayPredictions.filter(p => p.correct === true).length
+          const failed = dayPredictions.filter(p => p.correct === false).length
+          const total = dayPredictions.length
+          
+          last7Days.push({ date: dayName, successful, failed, total })
+        }
+        
+        predictionsOverTime.value = last7Days
+      } catch (e) {
+        predictionsOverTime.value = [
+          { date: 'Mon', successful: 0, failed: 0, total: 0 },
+          { date: 'Tue', successful: 0, failed: 0, total: 0 },
+          { date: 'Wed', successful: 0, failed: 0, total: 0 },
+          { date: 'Thu', successful: 0, failed: 0, total: 0 },
+          { date: 'Fri', successful: 0, failed: 0, total: 0 },
+          { date: 'Sat', successful: 0, failed: 0, total: 0 },
+          { date: 'Sun', successful: 0, failed: 0, total: 0 }
+        ]
+      }
+    }
+
+
 
     const modelPerformance = ref([])
 
-    const confidenceDistribution = ref([
-      { range: '90-100', count: 2450 },
-      { range: '80-89', count: 1560 },
-      { range: '70-79', count: 890 },
-      { range: '60-69', count: 450 },
-      { range: '50-59', count: 210 },
-      { range: '0-49', count: 95 }
-    ])
+    const confidenceDistribution = ref([])
 
-    const usageByHour = ref([
-      { hour: '00', predictions: 12 },
-      { hour: '02', predictions: 8 },
-      { hour: '04', predictions: 5 },
-      { hour: '06', predictions: 15 },
-      { hour: '08', predictions: 45 },
-      { hour: '10', predictions: 68 },
-      { hour: '12', predictions: 72 },
-      { hour: '14', predictions: 65 },
-      { hour: '16', predictions: 58 },
-      { hour: '18', predictions: 42 },
-      { hour: '20', predictions: 35 },
-      { hour: '22', predictions: 18 }
-    ])
+    const buildConfidenceDistribution = () => {
+      try {
+        const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
+        
+        const buckets = {
+          '90-100': 0,
+          '80-89': 0,
+          '70-79': 0,
+          '60-69': 0,
+          '50-59': 0,
+          '0-49': 0
+        }
+        
+        predictions.forEach(p => {
+          const conf = (p.confidence || 0) * 100
+          if (conf >= 90) buckets['90-100']++
+          else if (conf >= 80) buckets['80-89']++
+          else if (conf >= 70) buckets['70-79']++
+          else if (conf >= 60) buckets['60-69']++
+          else if (conf >= 50) buckets['50-59']++
+          else buckets['0-49']++
+        })
+        
+        confidenceDistribution.value = [
+          { range: '90-100', count: buckets['90-100'] },
+          { range: '80-89', count: buckets['80-89'] },
+          { range: '70-79', count: buckets['70-79'] },
+          { range: '60-69', count: buckets['60-69'] },
+          { range: '50-59', count: buckets['50-59'] },
+          { range: '0-49', count: buckets['0-49'] }
+        ]
+      } catch (e) {
+        confidenceDistribution.value = [
+          { range: '90-100', count: 0 },
+          { range: '80-89', count: 0 },
+          { range: '70-79', count: 0 },
+          { range: '60-69', count: 0 },
+          { range: '50-59', count: 0 },
+          { range: '0-49', count: 0 }
+        ]
+      }
+    }
+
+    const usageByHour = ref([])
+
+    const buildUsageByHour = () => {
+      try {
+        const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
+        
+        const hourBuckets = {}
+        for (let i = 0; i < 24; i += 2) {
+          hourBuckets[i.toString().padStart(2, '0')] = 0
+        }
+        
+        predictions.forEach(p => {
+          const date = new Date(p.timestamp)
+          const hour = date.getHours()
+          const bucket = Math.floor(hour / 2) * 2
+          const key = bucket.toString().padStart(2, '0')
+          if (hourBuckets[key] !== undefined) {
+            hourBuckets[key]++
+          }
+        })
+        
+        usageByHour.value = Object.keys(hourBuckets).map(hour => ({
+          hour,
+          predictions: hourBuckets[hour]
+        }))
+      } catch (e) {
+        usageByHour.value = [
+          { hour: '00', predictions: 0 },
+          { hour: '02', predictions: 0 },
+          { hour: '04', predictions: 0 },
+          { hour: '06', predictions: 0 },
+          { hour: '08', predictions: 0 },
+          { hour: '10', predictions: 0 },
+          { hour: '12', predictions: 0 },
+          { hour: '14', predictions: 0 },
+          { hour: '16', predictions: 0 },
+          { hour: '18', predictions: 0 },
+          { hour: '20', predictions: 0 },
+          { hour: '22', predictions: 0 }
+        ]
+      }
+    }
 
     const models = ref([])
     const overviewMetrics = ref({
@@ -406,8 +324,39 @@ export default {
       totalTrainingSamples: 0
     })
 
-    // Computed properties
+    const getDateRangeInDays = () => {
+      if (selectedRange.value === '7d') return 7
+      if (selectedRange.value === '30d') return 30
+      if (selectedRange.value === '90d') return 90
+      if (selectedRange.value === '1y') return 365
+      return 999999 // all time
+    }
+
+    const filterPredictions = () => {
+      try {
+        const all = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
+        const days = getDateRangeInDays()
+        const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000)
+        
+        return all.filter(p => {
+          const timestamp = new Date(p.timestamp).getTime()
+          const inRange = timestamp >= cutoff
+          const matchesModel = selectedModel.value === 'all' || p.model_used === selectedModel.value
+          return inRange && matchesModel
+        })
+      } catch (e) {
+        return []
+      }
+    }
+
+    // Computed properties (copied from Home.vue)
     const totalPredictions = computed(() => {
+      const filtered = filterPredictions()
+      if (filtered.length > 0) {
+        return filtered.length
+      }
+      
+      // Fallback to API data or mock data
       if (overviewMetrics.value.totalPredictions) {
         return overviewMetrics.value.totalPredictions
       }
@@ -415,15 +364,17 @@ export default {
     })
 
     const overallAccuracy = computed(() => {
-      if (overviewMetrics.value.averageAccuracy) {
-        return overviewMetrics.value.averageAccuracy.toFixed(1)
-      }
-      const totalSuccessful = predictionsOverTime.value.reduce((sum, day) => sum + day.successful, 0)
-      return ((totalSuccessful / totalPredictions.value) * 100).toFixed(1)
+      const filtered = filterPredictions()
+      if (!filtered.length) return '0.0'
+      const correct = filtered.filter(p => p.correct === true).length
+      return ((correct / filtered.length) * 100).toFixed(1)
     })
 
     const averageConfidence = computed(() => {
-      return 87.5 // Mock value
+      const filtered = filterPredictions()
+      if (!filtered.length) return '0.0'
+      const sum = filtered.reduce((acc, p) => acc + ((p.confidence || 0) * 100), 0)
+      return (sum / filtered.length).toFixed(1)
     })
 
     const userSatisfaction = computed(() => {
@@ -431,69 +382,24 @@ export default {
     })
 
     const maxPredictions = computed(() => {
-      return Math.max(...predictionsOverTime.value.map(day => day.total))
+      const values = predictionsOverTime.value.map(day => day.total)
+      const max = values.length > 0 ? Math.max(...values) : 0
+      return max > 0 ? max : 1
     })
 
     const maxConfidenceCount = computed(() => {
-      return Math.max(...confidenceDistribution.value.map(bucket => bucket.count))
+      const values = confidenceDistribution.value.map(bucket => bucket.count)
+      return values.length > 0 ? Math.max(...values) : 1
     })
 
     const maxUsage = computed(() => {
-      return Math.max(...usageByHour.value.map(hour => hour.predictions))
+      const values = usageByHour.value.map(hour => hour.predictions)
+      return values.length > 0 ? Math.max(...values) : 1
     })
 
-    const feedbackStats = computed(() => {
-      const correct = 1245
-      const incorrect = 78
-      const total = correct + incorrect
-      return {
-        correct,
-        incorrect,
-        total,
-        correctPercentage: ((correct / total) * 100).toFixed(1)
-      }
-    })
 
-    const correctFeedbackAngle = computed(() => {
-      return (feedbackStats.value.correct / feedbackStats.value.total) * 360
-    })
-
-    const incorrectFeedbackAngle = computed(() => {
-      return 360 - correctFeedbackAngle.value
-    })
-
-    // Mock detailed statistics
-    const responseTimes = ref({
-      average: 45,
-      p95: 89,
-      p99: 156
-    })
-
-    const errorAnalysis = ref({
-      total: 23,
-      model: 15,
-      system: 8
-    })
-
-    const userEngagement = ref({
-      active: 142,
-      avgSession: 8.5,
-      returnRate: 76.3
-    })
-
-    const modelUsage = ref({
-      mostUsed: 'CNN Basic',
-      avgAccuracy: 98.3,
-      avgTrainingTime: 12.5
-    })
 
     // Methods
-    const getAccuracyClass = (accuracy) => {
-      if (accuracy >= 99) return 'excellent'
-      if (accuracy >= 97) return 'good'
-      if (accuracy >= 95) return 'fair'
-      return 'poor'
-    }
 
     const updateAnalytics = () => {
       loadAnalytics()
@@ -507,14 +413,12 @@ export default {
 
     const loadAnalytics = async () => {
       try {
-        const [modelsResponse, accuracyResponse, overviewResponse] = await Promise.all([
+        const [modelsResponse, overviewResponse] = await Promise.all([
           api.get('/models'),
-          api.get('/models/accuracy-by-digit'),
           api.get('/analytics/overview')
         ])
 
         models.value = modelsResponse.data || []
-        digitAccuracy.value = accuracyResponse.data || digitAccuracy.value
         overviewMetrics.value = overviewResponse.data || overviewMetrics.value
 
         modelPerformance.value = models.value.map(model => ({
@@ -530,13 +434,16 @@ export default {
 
     onMounted(() => {
       loadAnalytics()
+      buildPredictionsOverTime()
+      buildConfidenceDistribution()
+      buildUsageByHour()
     })
 
     return {
+      t,
       selectedRange,
       selectedModel,
       predictionsOverTime,
-      digitAccuracy,
       modelPerformance,
       confidenceDistribution,
       usageByHour,
@@ -548,14 +455,6 @@ export default {
       maxPredictions,
       maxConfidenceCount,
       maxUsage,
-      feedbackStats,
-      correctFeedbackAngle,
-      incorrectFeedbackAngle,
-      responseTimes,
-      errorAnalysis,
-      userEngagement,
-      modelUsage,
-      getAccuracyClass,
       updateAnalytics,
       exportData
     }
@@ -575,62 +474,16 @@ export default {
 .page-header h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
-/* Filters */
-.filters {
-  display: flex;
-  gap: 16px;
-  align-items: end;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-}
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.filter-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.filter-select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  background: white;
-  min-width: 120px;
-}
-
-.export-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #059669;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.export-btn:hover {
-  background: #047857;
-}
 
 /* Metrics Overview */
 .metrics-overview {
@@ -641,11 +494,12 @@ export default {
 }
 
 .metric-card.large {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow);
   text-align: center;
+  border: 1px solid var(--border);
 }
 
 .metric-card.large .metric-value {
@@ -657,7 +511,7 @@ export default {
 
 .metric-card.large .metric-label {
   font-size: 16px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 12px;
 }
 
@@ -687,10 +541,11 @@ export default {
 }
 
 .chart-card {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
 }
 
 .chart-header {
@@ -703,7 +558,7 @@ export default {
 .chart-header h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -775,11 +630,7 @@ export default {
   min-height: 2px;
 }
 
-.bar.success {
-  background: #059669;
-}
-
-.bar.failed {
+.bar.total {
   background: #ef4444;
 }
 
@@ -789,63 +640,7 @@ export default {
   color: #374151;
 }
 
-/* Accuracy Chart */
-.accuracy-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-}
 
-.accuracy-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.digit {
-  width: 20px;
-  font-weight: 600;
-  color: #475569;
-  font-size: 14px;
-}
-
-.accuracy-bar-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.accuracy-bar {
-  height: 16px;
-  border-radius: 8px;
-  transition: width 0.3s ease;
-  min-width: 2px;
-}
-
-.accuracy-bar.excellent {
-  background: #059669;
-}
-
-.accuracy-bar.good {
-  background: #10b981;
-}
-
-.accuracy-bar.fair {
-  background: #f59e0b;
-}
-
-.accuracy-bar.poor {
-  background: #ef4444;
-}
-
-.accuracy-value {
-  width: 50px;
-  font-size: 12px;
-  color: #64748b;
-  text-align: right;
-}
 
 /* Model Comparison */
 .model-comparison {
@@ -984,176 +779,18 @@ export default {
   font-weight: 500;
 }
 
-/* Sentiment Chart */
-.sentiment-chart {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  height: 100%;
-}
 
-.sentiment-donut {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: conic-gradient(#059669 0deg var(--correct-angle, 0deg), #ef4444 var(--correct-angle, 0deg) 360deg);
-}
-
-.donut-segment {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 50% 100%);
-}
-
-.donut-segment.correct {
-  background: #059669;
-}
-
-.donut-segment.incorrect {
-  background: #ef4444;
-}
-
-.donut-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.donut-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #059669;
-}
-
-.donut-label {
-  font-size: 10px;
-  color: #64748b;
-}
-
-.sentiment-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sentiment-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.sentiment-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-}
-
-.sentiment-color.correct {
-  background: #059669;
-}
-
-.sentiment-color.incorrect {
-  background: #ef4444;
-}
-
-.sentiment-item strong {
-  color: #1e293b;
-  margin-left: 4px;
-}
-
-/* Detailed Statistics */
-.detailed-stats {
-  margin-bottom: 48px;
-}
-
-.detailed-stats h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 24px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-}
-
-.stat-card h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 16px;
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.stat-item:last-child {
-  border-bottom: none;
-}
-
-.stat-item span {
-  color: #64748b;
-  font-size: 14px;
-}
-
-.stat-item strong {
-  color: #1e293b;
-  font-size: 14px;
-  font-weight: 600;
-}
 
 /* Responsive */
 @media (max-width: 768px) {
   .charts-grid {
     grid-template-columns: 1fr;
   }
-  
-  .filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .filter-group {
-    width: 100%;
-  }
-  
-  .filter-select {
-    width: 100%;
-  }
-  
-  .sentiment-chart {
-    flex-direction: column;
-    gap: 20px;
-  }
-  
+
+
+
+
+
   .metrics-overview {
     grid-template-columns: 1fr 1fr;
   }

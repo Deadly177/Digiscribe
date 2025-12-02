@@ -135,7 +135,7 @@
     <div class="recent-activity">
       <div class="activity-header">
         <h2>{{ strings.recentActivityTitle }}</h2>
-        <router-link to="/dashboard/analytics" class="view-all-link">
+        <router-link to="/dashboard/history" class="view-all-link">
           {{ strings.viewAll }}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -226,14 +226,7 @@ export default {
           icon: 'import',
           disabled: true
         },
-        {
-          id: 'feedback',
-          title: 'Review Feedback',
-          description: 'Label user feedback and improve accuracy',
-          to: '/dashboard/feedback',
-          icon: 'feedback',
-          disabled: false
-        }
+
       ],
       activityFallback: {
         success: 'Digit 8 predicted successfully with 95% confidence',
@@ -282,14 +275,7 @@ export default {
           icon: 'import',
           disabled: true
         },
-        {
-          id: 'feedback',
-          title: '查看反馈',
-          description: '标注用户反馈并提升准确率',
-          to: '/dashboard/feedback',
-          icon: 'feedback',
-          disabled: false
-        }
+
       ],
       activityFallback: {
         success: '数字8预测成功，置信度95%',
@@ -361,7 +347,7 @@ export default {
     const getLocalRecentPredictions = () => {
       try {
         const raw = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
-        return raw.slice(0, 10).map((item, idx) => ({
+        return raw.slice(0, 5).map((item, idx) => ({
           id: item.id || idx,
           message: `Digit ${item.predicted_digit} predicted (${((item.confidence || 0) * 100).toFixed(1)}%)`,
           type: 'success',
@@ -501,12 +487,12 @@ export default {
 .page-header h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
@@ -518,10 +504,11 @@ export default {
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -569,13 +556,13 @@ export default {
 .stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -599,7 +586,7 @@ export default {
 .quick-actions-section h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 24px;
 }
 
@@ -610,24 +597,24 @@ export default {
 }
 
 .action-card {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow);
   display: flex;
   align-items: center;
   gap: 16px;
   text-decoration: none;
   color: inherit;
   transition: all 0.2s ease;
-  border: 2px solid transparent;
+  border: 2px solid var(--border);
   cursor: pointer;
 }
 
 .action-card:hover {
-  border-color: #059669;
+  border-color: var(--success);
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .action-card.coming-soon {
@@ -637,8 +624,8 @@ export default {
 
 .action-card.coming-soon:hover {
   transform: none;
-  border-color: transparent;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
 }
 
 .action-icon {
@@ -660,13 +647,13 @@ export default {
 .action-content h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .action-content p {
   font-size: 14px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -682,21 +669,22 @@ export default {
 }
 
 .action-arrow {
-  color: #64748b;
+  color: var(--text-secondary);
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
 .action-card:hover .action-arrow {
-  color: #059669;
+  color: var(--success);
   transform: translateX(4px);
 }
 
 .recent-activity {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   margin-bottom: 40px;
 }
 
@@ -710,7 +698,7 @@ export default {
 .activity-header h2 {
   font-size: 20px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -718,7 +706,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #059669;
+  color: var(--success);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -748,12 +736,12 @@ export default {
   gap: 16px;
   padding: 16px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--background);
   transition: all 0.2s ease;
 }
 
 .activity-item:hover {
-  background: #f1f5f9;
+  background: var(--border);
 }
 
 .activity-icon {
@@ -793,13 +781,13 @@ export default {
 
 .activity-message {
   font-size: 14px;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .activity-time {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 /* Responsive */

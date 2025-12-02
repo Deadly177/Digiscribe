@@ -1,43 +1,43 @@
 <template>
   <div class="profile-page">
     <div class="page-header">
-      <h1>Profile</h1>
-      <p>View and update your account details.</p>
+      <h1>{{ t('profile.title') }}</h1>
+      <p>{{ t('profile.subtitle') }}</p>
     </div>
 
     <div class="profile-grid">
       <div class="card">
-        <h2>Account Info</h2>
+        <h2>{{ t('profile.accountInfo') }}</h2>
         <div class="info-row">
-          <span class="label">Username</span>
-          <span class="value">{{ user.username || 'Unknown' }}</span>
+          <span class="label">{{ t('profile.username') }}</span>
+          <span class="value">{{ user.username || t('profile.unknown') }}</span>
         </div>
         <div class="info-row">
-          <span class="label">Email</span>
-          <span class="value">{{ user.email || 'Not set' }}</span>
+          <span class="label">{{ t('profile.email') }}</span>
+          <span class="value">{{ user.email || t('profile.notSet') }}</span>
         </div>
-        <button class="primary-btn" @click="refreshUser">Refresh</button>
+        <button class="primary-btn" @click="refreshUser">{{ t('profile.refresh') }}</button>
       </div>
 
       <div class="card">
-        <h2>Change Password</h2>
+        <h2>{{ t('profile.changePassword') }}</h2>
         <form @submit.prevent="changePassword">
-          <label>Current Password</label>
+          <label>{{ t('profile.currentPassword') }}</label>
           <input type="password" v-model="passwordForm.current" required />
-          <label>New Password</label>
+          <label>{{ t('profile.newPassword') }}</label>
           <input type="password" v-model="passwordForm.next" required />
-          <label>Confirm New Password</label>
+          <label>{{ t('profile.confirmNewPassword') }}</label>
           <input type="password" v-model="passwordForm.confirm" required />
-          <button type="submit" class="primary-btn">Update Password</button>
+          <button type="submit" class="primary-btn">{{ t('profile.updatePassword') }}</button>
         </form>
       </div>
 
       <div class="card">
-        <h2>Email Verification</h2>
-        <p v-if="emailVerified">Your email is verified.</p>
-        <p v-else>Verify your email to secure your account.</p>
+        <h2>{{ t('profile.emailVerification') }}</h2>
+        <p v-if="emailVerified">{{ t('profile.emailVerified') }}</p>
+        <p v-else>{{ t('profile.verifyEmail') }}</p>
         <button class="ghost-btn" @click="sendVerification" :disabled="verifying">
-          {{ verifying ? 'Sending...' : 'Send Verification Email' }}
+          {{ verifying ? t('profile.sending') : t('profile.sendVerificationEmail') }}
         </button>
       </div>
     </div>
@@ -48,10 +48,12 @@
 import { ref, onMounted } from 'vue'
 import authService from '@/services/authService'
 import api from '@/services/api'
+import { useI18n } from '@/i18n'
 
 export default {
   name: 'Profile',
   setup() {
+    const { t } = useI18n()
     const user = ref(authService.getCurrentUser() || {})
     const emailVerified = ref(false)
     const verifying = ref(false)
@@ -97,7 +99,7 @@ export default {
 
     onMounted(refreshUser)
 
-    return { user, emailVerified, verifying, passwordForm, refreshUser, changePassword, sendVerification }
+    return { t, user, emailVerified, verifying, passwordForm, refreshUser, changePassword, sendVerification }
   }
 }
 </script>
@@ -115,7 +117,7 @@ export default {
 }
 .page-header p {
   margin: 4px 0 0;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 .profile-grid {
   display: grid;
@@ -139,7 +141,7 @@ export default {
   margin-bottom: 10px;
 }
 .label {
-  color: #9ca3af;
+  color: var(--text-secondary);
 }
 .value {
   font-weight: 600;
@@ -152,9 +154,9 @@ form {
 input {
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #1f2937;
-  background: #0b1120;
-  color: #e5e7eb;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
 }
 .primary-btn, .ghost-btn {
   margin-top: 8px;
@@ -165,12 +167,18 @@ input {
   font-weight: 600;
 }
 .primary-btn {
-  background: #16a34a;
+  background: var(--success);
   color: white;
 }
+.primary-btn:hover {
+  opacity: 0.9;
+}
 .ghost-btn {
-  background: #1f2937;
-  color: #e5e7eb;
-  border: 1px solid #1f2937;
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.ghost-btn:hover {
+  background: var(--border);
 }
 </style>

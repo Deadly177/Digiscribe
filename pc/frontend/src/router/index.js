@@ -5,11 +5,12 @@ import Dashboard from '../views/Dashboard.vue'
 import DigitRecognition from '../views/DigitRecognition.vue'
 import TrainModel from '../views/TrainModel.vue'
 import Analytics from '../views/Analytics.vue'
-import FeedbackSystem from '../views/FeedbackSystem.vue'
+
 import AdminPanel from '../views/AdminPanel.vue'
 import Home from '../views/Home.vue'
 import Profile from '../views/Profile.vue'
 import Settings from '../views/Settings.vue'
+import PredictionHistory from '../views/PredictionHistory.vue'
 
 const routes = [
   {
@@ -48,11 +49,7 @@ const routes = [
         name: 'Analytics',
         component: Analytics
       },
-      {
-        path: 'feedback',
-        name: 'FeedbackSystem',
-        component: FeedbackSystem
-      },
+
       {
         path: 'admin',
         name: 'AdminPanel',
@@ -67,6 +64,11 @@ const routes = [
         path: 'settings',
         name: 'Settings',
         component: Settings
+      },
+      {
+        path: 'history',
+        name: 'PredictionHistory',
+        component: PredictionHistory
       }
     ]
   },

@@ -23,9 +23,11 @@ public class DatabaseConfig {
             URI dbUri = new URI(databaseUrl);
             String username = dbUri.getUserInfo().split(":")[0];
             String password = dbUri.getUserInfo().split(":")[1];
-            String jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + dbUri.getPort() + dbUri.getPath();
+            int port = dbUri.getPort() == -1 ? 5432 : dbUri.getPort();
+            String jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
 
             HikariDataSource dataSource = new HikariDataSource();
+            dataSource.setDriverClassName("org.postgresql.Driver");
             dataSource.setJdbcUrl(jdbcUrl);
             dataSource.setUsername(username);
             dataSource.setPassword(password);

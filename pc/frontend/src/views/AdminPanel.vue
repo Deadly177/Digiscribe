@@ -273,6 +273,71 @@
           </div>
         </div>
 
+        <!-- Mobile Users -->
+        <div v-if="activeTab === 'mobileUsers'" class="tab-pane">
+          <div class="pane-header">
+            <h3>Mobile Users</h3>
+            <button class="btn-outline" @click="loadMobileUsers">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+
+          <div class="users-table">
+            <div class="table-header">
+              <div class="table-row mobile-row">
+                <div class="table-cell">User</div>
+                <div class="table-cell">Email</div>
+                <div class="table-cell">Registered</div>
+                <div class="table-cell">Status</div>
+                <div class="table-cell actions">Actions</div>
+              </div>
+            </div>
+            <div class="table-body">
+              <div 
+                v-for="user in mobileUsers" 
+                :key="user.id"
+                class="table-row mobile-row"
+              >
+                <div class="table-cell user-info">
+                  <div class="user-avatar">
+                    {{ getUserInitials(user.username) }}
+                  </div>
+                  <div class="user-details">
+                    <div class="user-name">{{ user.username }}</div>
+                  </div>
+                </div>
+                <div class="table-cell">
+                  {{ user.email }}
+                </div>
+                <div class="table-cell">
+                  {{ formatTime(user.createdAt) }}
+                </div>
+                <div class="table-cell">
+                  <span class="status-badge active">Active</span>
+                </div>
+                <div class="table-cell actions">
+                  <div class="action-buttons">
+                    <button class="action-btn delete" @click="deleteMobileUser(user)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-if="mobileUsers.length === 0" class="empty-state">
+                <p>No mobile users registered yet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Model Management -->
         <div v-if="activeTab === 'models'" class="tab-pane">
           <div class="pane-header">
@@ -402,11 +467,15 @@ export default {
     const tabs = computed(() => [
       { id: 'users', name: t('admin.users') },
       { id: 'system', name: t('admin.systemHealth') },
-      { id: 'models', name: t('admin.models') }
+      { id: 'models', name: t('admin.models') },
+      { id: 'mobileUsers', name: 'Mobile Users' }
     ])
 
-    // Stats from localStorage
+    // Stats - match Home.vue approach
     const stats = computed(() => {
+      // Use model prediction counts like Home.vue
+      const modelTotalPredictions = adminModels.value.reduce((sum, m) => sum + (m.prediction_count || m.predictions || 0), 0)
+      
       const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions') || '[]')
       const correct = predictions.filter(p => p.correct === true).length
       const accuracy = predictions.length > 0 ? ((correct / predictions.length) * 100).toFixed(1) : 0
@@ -415,7 +484,7 @@ export default {
       
       return {
         totalUsers: 1,
-        totalPredictions: predictions.length,
+        totalPredictions: modelTotalPredictions || predictions.length,
         systemAccuracy: parseFloat(accuracy),
         storageUsed: parseFloat(storageMB)
       }
@@ -494,7 +563,28 @@ export default {
       return events
     })
 
+    const mobileUsers = ref([])
     const adminModels = ref([])
+    
+    const loadMobileUsers = async () => {
+      try {
+        const response = await api.get('/auth/users')
+        mobileUsers.value = response.data.map(user => ({
+          ...user,
+          id: user.id || user.username,
+          createdAt: user.createdAt || user.created_at || new Date()
+        }))
+      } catch (error) {
+        console.error('Failed to load mobile users from API, checking localStorage:', error)
+        const localUsers = JSON.parse(localStorage.getItem('system_users') || '[]')
+        mobileUsers.value = localUsers.map((user, index) => ({
+          id: index + 1,
+          username: user.username,
+          email: user.email,
+          createdAt: user.createdAt || new Date()
+        }))
+      }
+    }
     
     const loadModels = async () => {
       try {
@@ -580,6 +670,21 @@ export default {
       }
     }
 
+    const deleteMobileUser = async (user) => {
+      if (!confirm(`Are you sure you want to delete ${user.username}?`)) return
+      
+      try {
+        await api.delete(`/auth/users/${user.id}`)
+        mobileUsers.value = mobileUsers.value.filter(u => u.id !== user.id)
+      } catch (error) {
+        console.error('Failed to delete from API, removing from localStorage:', error)
+        const localUsers = JSON.parse(localStorage.getItem('system_users') || '[]')
+        const filtered = localUsers.filter(u => u.username !== user.username)
+        localStorage.setItem('system_users', JSON.stringify(filtered))
+        mobileUsers.value = mobileUsers.value.filter(u => u.id !== user.id)
+      }
+    }
+
     const deployNewModel = () => {
       router.push('/dashboard/models')
     }
@@ -628,6 +733,7 @@ export default {
 
     onMounted(() => {
       loadModels()
+      loadMobileUsers()
     })
 
     return {
@@ -636,6 +742,7 @@ export default {
       tabs,
       stats,
       users,
+      mobileUsers,
       systemHealth,
       systemEvents,
       adminModels,
@@ -643,6 +750,7 @@ export default {
       userFormError,
       newUser,
       addNewUser,
+      loadMobileUsers,
       getUserInitials,
       formatTime,
       editUser,
@@ -652,6 +760,7 @@ export default {
       toggleModelStatus,
       retrainModel,
       deleteModel,
+      deleteMobileUser,
       deployNewModel
     }
   }
@@ -890,6 +999,10 @@ export default {
   gap: 16px;
   padding: 16px 24px;
   align-items: center;
+}
+
+.table-row.mobile-row {
+  grid-template-columns: 2fr 2fr 1fr 1fr 1fr;
 }
 
 .table-body .table-row {
@@ -1309,6 +1422,13 @@ export default {
   padding: 10px 12px;
   margin-bottom: 16px;
   font-size: 13px;
+}
+
+.empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
 }
 
 /* Responsive */

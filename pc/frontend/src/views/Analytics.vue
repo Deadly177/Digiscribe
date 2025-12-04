@@ -187,28 +187,28 @@ export default {
     const buildPredictionsOverTime = () => {
       try {
         const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
-        
+
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         const last7Days = []
         const now = new Date()
-        
+
         for (let i = 6; i >= 0; i--) {
           const date = new Date(now)
           date.setDate(date.getDate() - i)
           const dayName = days[date.getDay()]
-          
+
           const dayPredictions = predictions.filter(p => {
             const pDate = new Date(p.timestamp)
             return pDate.toDateString() === date.toDateString()
           })
-          
+
           const successful = dayPredictions.filter(p => p.correct === true).length
           const failed = dayPredictions.filter(p => p.correct === false).length
           const total = dayPredictions.length
-          
+
           last7Days.push({ date: dayName, successful, failed, total })
         }
-        
+
         predictionsOverTime.value = last7Days
       } catch (e) {
         predictionsOverTime.value = [
@@ -225,6 +225,7 @@ export default {
 
 
 
+    const digitAccuracy = ref([])
     const modelPerformance = ref([])
 
     const confidenceDistribution = ref([])
@@ -232,7 +233,7 @@ export default {
     const buildConfidenceDistribution = () => {
       try {
         const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
-        
+
         const buckets = {
           '90-100': 0,
           '80-89': 0,
@@ -241,7 +242,7 @@ export default {
           '50-59': 0,
           '0-49': 0
         }
-        
+
         predictions.forEach(p => {
           const conf = (p.confidence || 0) * 100
           if (conf >= 90) buckets['90-100']++
@@ -251,7 +252,7 @@ export default {
           else if (conf >= 50) buckets['50-59']++
           else buckets['0-49']++
         })
-        
+
         confidenceDistribution.value = [
           { range: '90-100', count: buckets['90-100'] },
           { range: '80-89', count: buckets['80-89'] },
@@ -277,12 +278,12 @@ export default {
     const buildUsageByHour = () => {
       try {
         const predictions = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
-        
+
         const hourBuckets = {}
         for (let i = 0; i < 24; i += 2) {
           hourBuckets[i.toString().padStart(2, '0')] = 0
         }
-        
+
         predictions.forEach(p => {
           const date = new Date(p.timestamp)
           const hour = date.getHours()
@@ -292,7 +293,7 @@ export default {
             hourBuckets[key]++
           }
         })
-        
+
         usageByHour.value = Object.keys(hourBuckets).map(hour => ({
           hour,
           predictions: hourBuckets[hour]
@@ -337,7 +338,7 @@ export default {
         const all = JSON.parse(localStorage.getItem('digit_recognition_recent_predictions')) || []
         const days = getDateRangeInDays()
         const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000)
-        
+
         return all.filter(p => {
           const timestamp = new Date(p.timestamp).getTime()
           const inRange = timestamp >= cutoff
@@ -349,17 +350,19 @@ export default {
       }
     }
 
-    // Computed properties (copied from Home.vue)
+    // Computed properties
     const totalPredictions = computed(() => {
-      const filtered = filterPredictions()
-      if (filtered.length > 0) {
-        return filtered.length
+      // Use model prediction counts like Home.vue does
+      const modelTotalPredictions = models.value.reduce((sum, m) => sum + (m.prediction_count || 0), 0)
+      if (modelTotalPredictions > 0) {
+        return modelTotalPredictions
       }
-      
-      // Fallback to API data or mock data
+
+      // Fallback to overview metrics
       if (overviewMetrics.value.totalPredictions) {
         return overviewMetrics.value.totalPredictions
       }
+
       return predictionsOverTime.value.reduce((sum, day) => sum + day.total, 0)
     })
 
@@ -413,13 +416,20 @@ export default {
 
     const loadAnalytics = async () => {
       try {
-        const [modelsResponse, overviewResponse] = await Promise.all([
+        const [modelsResponse, accuracyResponse, overviewResponse] = await Promise.all([
           api.get('/models'),
+          api.get('/models/accuracy-by-digit'),
           api.get('/analytics/overview')
         ])
 
-        models.value = modelsResponse.data || []
+        models.value = Array.isArray(modelsResponse.data) ? modelsResponse.data : []
+        const accuracyData = Array.isArray(accuracyResponse.data) ? accuracyResponse.data : []
         overviewMetrics.value = overviewResponse.data || overviewMetrics.value
+
+        // Update digit accuracy from API
+        if (accuracyData.length > 0) {
+          digitAccuracy.value = accuracyData
+        }
 
         modelPerformance.value = models.value.map(model => ({
           id: model.id,

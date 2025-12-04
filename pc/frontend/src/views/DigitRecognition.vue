@@ -46,7 +46,7 @@
           <canvas
             ref="canvas"
             width="280"
-            height="252"
+            height="280"
             class="drawing-canvas"
             @mousedown="startDrawing"
             @mousemove="draw"

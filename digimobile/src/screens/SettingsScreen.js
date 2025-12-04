@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS } from '../config';
+import { COLORS, API_BASE_URL } from '../config';
 import { t, getLocale, setLocale, subscribe } from '../i18n';
+import api from '../services/api';
 
 const THEME_KEY = 'digiscribe_theme';
 
@@ -12,15 +13,19 @@ export default function SettingsScreen() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [locale, setLocaleState] = useState(getLocale());
   const [userData, setUserData] = useState(null);
+  const [backendStatus, setBackendStatus] = useState('checking');
 
   useEffect(() => {
     loadSettings();
     loadUserData();
+    checkBackendStatus();
     const unsubscribe = subscribe((newLocale) => setLocaleState(newLocale));
-    const interval = setInterval(loadUserData, 1000);
+    const userInterval = setInterval(loadUserData, 1000);
+    const statusInterval = setInterval(checkBackendStatus, 5000);
     return () => {
       unsubscribe();
-      clearInterval(interval);
+      clearInterval(userInterval);
+      clearInterval(statusInterval);
     };
   }, []);
 
@@ -56,6 +61,15 @@ export default function SettingsScreen() {
     setLocaleState(lang);
   };
 
+  const checkBackendStatus = async () => {
+    try {
+      await api.get('/health', { timeout: 3000 });
+      setBackendStatus('connected');
+    } catch (error) {
+      setBackendStatus('disconnected');
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await AsyncStorage.removeItem('user_data');
@@ -70,6 +84,13 @@ export default function SettingsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>{t('settings.title')}</Text>
         <Text style={styles.subtitle}>{t('settings.subtitle')}</Text>
+        <View style={styles.statusContainer}>
+          <View style={[styles.statusDot, backendStatus === 'connected' ? styles.statusConnected : backendStatus === 'disconnected' ? styles.statusDisconnected : styles.statusChecking]} />
+          <Text style={styles.statusText}>
+            Backend: {backendStatus === 'connected' ? 'Connected' : backendStatus === 'disconnected' ? 'Disconnected' : 'Checking...'}
+          </Text>
+        </View>
+        <Text style={styles.apiUrl}>{API_BASE_URL}</Text>
       </View>
 
       {userData && (
@@ -266,5 +287,42 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  statusConnected: {
+    backgroundColor: '#22c55e',
+  },
+  statusDisconnected: {
+    backgroundColor: '#ef4444',
+  },
+  statusChecking: {
+    backgroundColor: '#f59e0b',
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  apiUrl: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    marginTop: 4,
+    fontFamily: 'monospace',
   },
 });

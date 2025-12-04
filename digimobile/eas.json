@@ -5,10 +5,10 @@
         "buildType": "apk"
       }
     },
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "production": {}
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
   }
 }

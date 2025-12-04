@@ -1,6 +1,6 @@
 // Backend Configuration
-// Use 10.0.2.2 for Android emulator to access host machine
-export const API_BASE_URL = 'http://10.0.2.2:8081/api';
+// Use your computer's IP address for Android emulator
+export const API_BASE_URL = 'http://192.168.1.59:8081/api';
 
 // Theme Colors (matching PC app)
 export const COLORS = {

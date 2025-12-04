@@ -2,14 +2,14 @@
   <aside class="sidebar" :class="{ collapsed: isCollapsed }">
     <div class="sidebar-header">
       <div class="logo" v-if="!isCollapsed">
-        <img src="@/assets/brand-logo.svg" alt="DigiScrib logo">
+        <img src="@/assets/brand-logo.png" alt="DigiScrib logo">
         <div>
           <h2>{{ t('brand.appName') }}</h2>
           <p>{{ t('brand.tagline') }}</p>
         </div>
       </div>
       <div class="logo-collapsed" v-else>
-        <img src="@/assets/brand-logo.svg" alt="Logo">
+        <img src="@/assets/brand-logo.png" alt="Logo">
       </div>
     </div>
     

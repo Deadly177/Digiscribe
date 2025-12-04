@@ -9,7 +9,7 @@
       <div class="brand-section">
         <div class="logo">
           <div class="logo-icon">
-            <img src="@/assets/brand-logo.svg" alt="DigiScrib Logo">
+            <img src="@/assets/brand-logo.png" alt="DigiScrib Logo">
           </div>
           <div class="brand-text">
             <h1 class="app-name">{{ t('brand.appName') }}</h1>

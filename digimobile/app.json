@@ -19,10 +19,6 @@
       "bundleIdentifier": "com.digiscribe.mobile"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0f172a"
-      },
       "package": "com.digiscribe.mobile"
     },
     "web": {

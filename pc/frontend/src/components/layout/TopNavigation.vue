@@ -9,7 +9,7 @@
         </svg>
       </button>
       <div class="nav-brand">
-        <img src="@/assets/brand-logo.svg" alt="logo">
+        <img src="@/assets/brand-logo.png" alt="logo">
         <div>
           <span class="brand-name">{{ t('brand.appName') }}</span>
           <span class="page-title">{{ currentPageTitle }}</span>

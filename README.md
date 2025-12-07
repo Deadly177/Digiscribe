@@ -160,4 +160,4 @@ curl -X POST http://localhost:8081/api/recognition/predict \
 - If Maven warns about duplicate dependencies, resolve duplicates in `pc/backend/pom.xml`.
 
 ## License
-MIT (unless a different license is provided).***
+MIT https://github.com/Deadly177/Digiscribe/blob/588a4b56c3fca23ebec3ad0cac8803237302decd/LICENSE.

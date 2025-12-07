@@ -152,6 +152,8 @@ curl -X POST http://localhost:8000/api/predict \
 curl -X POST http://localhost:8081/api/recognition/predict \
   -H "Content-Type: application/json" \
   -d '{"inputType":"BASE64","imageData":"<base64_png>","originalFilename":"sample.png","modelId":"default"}'
+
+  website Link - https://digiscribe-frontend.onrender.com (User- admin , password - admin123 )
 ```
 
 ## Notes & Troubleshooting

@@ -152,9 +152,9 @@ curl -X POST http://localhost:8000/api/predict \
 curl -X POST http://localhost:8081/api/recognition/predict \
   -H "Content-Type: application/json" \
   -d '{"inputType":"BASE64","imageData":"<base64_png>","originalFilename":"sample.png","modelId":"default"}'
-
-  website Link - https://digiscribe-frontend.onrender.com (User- admin , password - admin123 )
 ```
+
+##website Link - https://digiscribe-frontend.onrender.com (User- admin , password - admin123 )
 
 ## Notes & Troubleshooting
 - Vite requires Node ≥20.19; using older Node (e.g., 18) triggers `crypto.hash is not a function`.
